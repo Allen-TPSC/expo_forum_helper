@@ -1,0 +1,2423 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>展會名片幫手 | B2B 參展即時建檔與跟進系統</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Noto Sans TC & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'Noto Sans TC', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    /* 自訂捲軸與微動畫樣式 */
+    body {
+      font-family: 'Inter', 'Noto Sans TC', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+    .recording-pulse {
+      animation: pulse-ring 1.5s infinite;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-slide-up {
+      animation: slideUp 0.25s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-50 text-slate-900">
+
+  <!-- ==================== 頂部固定導覽列 (Top Sticky Header) ==================== -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
+    <div class="max-w-5xl mx-auto px-3 sm:px-6 py-2.5">
+      <!-- 第一列：品牌名稱 + 功能設定按鈕 -->
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-700 to-brand-500 flex items-center justify-center text-white shadow-sm shrink-0">
+            <!-- 名片掃描圖示 -->
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <rect x="3" y="5" width="18" height="14" rx="2.5"></rect>
+              <circle cx="9" cy="11" r="2"></circle>
+              <path d="M14 10h4M14 14h4M6.5 16c.6-1.3 1.7-2 2.5-2s1.9.7 2.5 2"></path>
+            </svg>
+          </div>
+          <div class="truncate">
+            <div class="flex items-center gap-1.5">
+              <h1 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 truncate">展會名片幫手</h1>
+              <span class="hidden xs:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-brand-50 text-brand-700 border border-brand-200">B2B 現場版</span>
+            </div>
+            <p class="text-[11px] text-slate-500 hidden sm:block">AI 拍名片建檔・語音速記・分頁同步・一鍵寄感謝信</p>
+          </div>
+        </div>
+
+        <!-- 右側：串接設定 & 個資安全狀態 -->
+        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <a href="https://docs.google.com/spreadsheets/d/1fKlR1HJeBueQCEAu83FkegSWd2f5OZMC_S3O3-z8ZHw/edit?usp=sharing" target="_blank" rel="noopener noreferrer" id="headerSheetLink" title="點擊開啟已綁定的 Google 試算表：展會與論壇名片幫手" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 transition">
+            <span id="headerSyncDot" class="w-2 h-2 rounded-full bg-amber-500"></span>
+            <span class="max-w-[130px] truncate">表單：展會與論壇名片幫手</span>
+            <span id="headerSyncStatusText" class="text-[10px] px-1.5 py-0.2 rounded bg-white/80 text-slate-600 border border-emerald-200">待貼 GAS 網址</span>
+            <span class="text-[11px]">↗</span>
+          </a>
+          <button type="button" onclick="openSettingsModal()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 active:scale-[0.98] transition">
+            <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            <span>串接設定</span>
+            <span id="settingsDot" class="w-2 h-2 rounded-full bg-amber-500"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 第二列：目前參展活動下拉選單 + 管理活動按鈕 -->
+      <div class="mt-2.5 pt-2.5 border-t border-slate-100 flex items-center gap-2">
+        <label for="activeEventSelect" class="text-xs font-semibold text-slate-500 whitespace-nowrap flex items-center gap-1">
+          <svg class="w-3.5 h-3.5 text-brand-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          目前活動：
+        </label>
+        <div class="relative flex-1 min-w-0">
+          <select id="activeEventSelect" onchange="handleEventSwitch(this.value)" class="w-full appearance-none bg-brand-50/70 hover:bg-brand-50 border border-brand-200 text-brand-900 font-semibold text-xs sm:text-sm rounded-xl pl-3 pr-8 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500 transition truncate">
+            <!-- 由 JS 動態填入活動選項 -->
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-2.5 flex items-center text-brand-700">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </div>
+        </div>
+        <button type="button" onclick="openEventsModal()" class="inline-flex items-center gap-1 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold text-brand-700 bg-white border border-brand-200 hover:bg-brand-50 active:scale-[0.98] transition shrink-0 shadow-2xs">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
+          </svg>
+          <span>管理活動</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 主分頁導覽列 (3 Main Navigation Tabs) -->
+    <nav class="max-w-5xl mx-auto px-3 sm:px-6 bg-white border-t border-slate-100">
+      <div class="grid grid-cols-3 gap-1 py-1.5">
+        <button type="button" id="navTab-capture" onclick="switchMainTab('capture')" class="main-nav-btn flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl text-xs sm:text-sm font-bold transition bg-brand-600 text-white shadow-xs">
+          <span>📸</span>
+          <span>拍名片建檔</span>
+        </button>
+        <button type="button" id="navTab-directory" onclick="switchMainTab('directory')" class="main-nav-btn flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl text-xs sm:text-sm font-semibold transition text-slate-600 hover:bg-slate-100">
+          <span>🗂️</span>
+          <span>活動名片庫</span>
+          <span id="totalEventCountBadge" class="px-1.5 py-0.2 rounded-full text-[11px] bg-slate-200 text-slate-700 font-bold">0</span>
+        </button>
+        <button type="button" id="navTab-template" onclick="switchMainTab('template')" class="main-nav-btn flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl text-xs sm:text-sm font-semibold transition text-slate-600 hover:bg-slate-100">
+          <span>✉️</span>
+          <span>感謝函範本</span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ==================== 主內容區 (Main Content) ==================== -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-6 pb-20">
+
+    <!-- ================================================================
+         VIEW 1: 📸 拍名片建檔 (Capture, AI OCR & Voice Field Notes)
+         ================================================================ -->
+    <section id="view-capture" class="space-y-4 animate-slide-up">
+      <!-- 目標寫入頁籤提示條 -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-3.5 sm:px-5 flex flex-wrap items-center justify-between gap-2 shadow-2xs">
+        <div class="flex items-center gap-2 text-xs sm:text-sm flex-wrap">
+          <span class="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 font-bold text-xs">📊</span>
+          <span class="text-slate-600">寫入試算表：</span>
+          <a href="https://docs.google.com/spreadsheets/d/1fKlR1HJeBueQCEAu83FkegSWd2f5OZMC_S3O3-z8ZHw/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="font-bold text-emerald-700 hover:underline">展會與論壇名片幫手 ↗</a>
+          <span class="text-slate-400">▸</span>
+          <span class="text-slate-600">目標頁籤：</span>
+          <span id="captureTargetSheetName" class="font-bold text-slate-900 bg-slate-100 px-2.5 py-0.5 rounded-lg border border-slate-200">2026 台北國際電腦展 COMPUTEX</span>
+        </div>
+        <div class="flex items-center gap-2 text-xs text-slate-500">
+          <span id="captureEventMeta">攤位：南港展覽館 1 館 J0818</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+        <!-- 左側：名片拍照 / 上傳 & AI 辨識區 (5 cols) -->
+        <div class="lg:col-span-5 space-y-4">
+          <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-2xs">
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
+                <span class="w-2 h-5 rounded-full bg-brand-600"></span>
+                1. 拍攝或上傳名片
+              </h2>
+              <span class="text-[11px] font-medium text-brand-700 bg-brand-50 px-2 py-0.5 rounded-full">支援中/英/日/多語辨識</span>
+            </div>
+
+            <!-- 隱藏檔案輸入框 (支援手機直接開啟後鏡頭) -->
+            <input type="file" id="cardImageInput" accept="image/*" capture="environment" class="hidden" onchange="handleCardImageSelected(event)" />
+            <input type="file" id="cardGalleryInput" accept="image/*" class="hidden" onchange="handleCardImageSelected(event)" />
+
+            <!-- 拍照拖放與預覽區 -->
+            <div id="cameraDropZone" onclick="document.getElementById('cardImageInput').click()" class="relative cursor-pointer group rounded-2xl border-2 border-dashed border-brand-300 hover:border-brand-500 bg-brand-50/40 hover:bg-brand-50/80 transition p-5 text-center flex flex-col items-center justify-center min-h-[210px] overflow-hidden">
+              <!-- 預設未上傳狀態 -->
+              <div id="cameraPlaceholder" class="space-y-2.5">
+                <div class="w-14 h-14 mx-auto rounded-2xl bg-brand-600 text-white flex items-center justify-center shadow-md group-hover:scale-105 transition">
+                  <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                    <circle cx="12" cy="13" r="3"></circle>
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-sm sm:text-base font-bold text-slate-900">點擊開啟相機拍名片</p>
+                  <p class="text-xs text-slate-500 mt-0.5">AI 自動擷取姓名、公司、職稱、電話與 Email</p>
+                </div>
+              </div>
+
+              <!-- 圖片預覽縮圖 -->
+              <img id="cardPreviewImg" src="" alt="名片預覽" class="hidden max-h-52 w-auto rounded-xl shadow-sm object-contain mx-auto" />
+
+              <!-- AI 辨識 Loading 遮罩 -->
+              <div id="ocrLoadingOverlay" class="hidden absolute inset-0 bg-slate-900/75 backdrop-blur-xs flex flex-col items-center justify-center text-white p-4">
+                <div class="w-10 h-10 border-4 border-white/30 border-t-white rounded-full animate-spin mb-3"></div>
+                <p class="text-sm font-bold">AI 正在辨識名片資訊...</p>
+                <p class="text-xs text-slate-300 mt-1">自動解析多國語言與聯絡欄位</p>
+              </div>
+            </div>
+
+            <!-- 輔助按鈕列：從相簿選擇 & 範例名片快速測試 -->
+            <div class="mt-3 grid grid-cols-2 gap-2">
+              <button type="button" onclick="document.getElementById('cardGalleryInput').click()" class="py-2 px-3 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition flex items-center justify-center gap-1.5">
+                <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <path d="M21 15l-5-5L5 21"></path>
+                </svg>
+                <span>從相簿選圖</span>
+              </button>
+              <button type="button" onclick="toggleSampleCardsMenu()" class="py-2 px-3 rounded-xl text-xs font-semibold text-brand-700 bg-brand-50 hover:bg-brand-100 border border-brand-200 transition flex items-center justify-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+                <span>載入範例名片測試</span>
+              </button>
+            </div>
+
+            <!-- 範例名片選擇抽屜 (方便無實體名片時一鍵測試 AI 建檔) -->
+            <div id="sampleCardsDrawer" class="hidden mt-3 p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">選擇模擬名片（自動帶入並模擬辨識）：</p>
+              <div class="grid grid-cols-1 gap-1.5">
+                <button type="button" onclick="loadSampleCard(0)" class="text-left p-2 rounded-lg bg-white hover:bg-brand-50 border border-slate-200 hover:border-brand-300 transition flex items-center justify-between">
+                  <div>
+                    <div class="text-xs font-bold text-slate-800">🇹🇼 陳建宏｜台達智造自動化 業務協理</div>
+                    <div class="text-[11px] text-slate-500">繁體中文・製造業採購決策者</div>
+                  </div>
+                  <span class="text-xs font-semibold text-brand-600">套用 →</span>
+                </button>
+                <button type="button" onclick="loadSampleCard(1)" class="text-left p-2 rounded-lg bg-white hover:bg-brand-50 border border-slate-200 hover:border-brand-300 transition flex items-center justify-between">
+                  <div>
+                    <div class="text-xs font-bold text-slate-800">🇺🇸 Michael Vance｜NovaSilicon USA VP</div>
+                    <div class="text-[11px] text-slate-500">英文・北美半導體通路合作</div>
+                  </div>
+                  <span class="text-xs font-semibold text-brand-600">套用 →</span>
+                </button>
+                <button type="button" onclick="loadSampleCard(2)" class="text-left p-2 rounded-lg bg-white hover:bg-brand-50 border border-slate-200 hover:border-brand-300 transition flex items-center justify-between">
+                  <div>
+                    <div class="text-xs font-bold text-slate-800">🇯🇵 佐藤 健一｜東京精密ロボティクス 部長</div>
+                    <div class="text-[11px] text-slate-500">日文・精密機械零件詢價</div>
+                  </div>
+                  <span class="text-xs font-semibold text-brand-600">套用 →</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 隱私與法遵提示卡 -->
+          <div class="bg-emerald-50/80 rounded-2xl border border-emerald-200 p-3.5 flex items-start gap-2.5">
+            <svg class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+            <div class="text-xs text-emerald-900 leading-relaxed">
+              <span class="font-bold">企業個資法遵設計：</span>名片影像僅即時解析，不留存第三方雲端資料庫；聯絡人僅存於本機與您自行綁定的 Google Sheet 專屬活動頁籤。
+            </div>
+          </div>
+        </div>
+
+        <!-- 右側：名片欄位確認 + 接洽重點(語音輸入) + 儲存與寄信 (7 cols) -->
+        <div class="lg:col-span-7">
+          <form id="cardCaptureForm" onsubmit="handleSaveCard(event, false)" class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-2xs space-y-4">
+            <div class="flex items-center justify-between">
+              <h2 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
+                <span class="w-2 h-5 rounded-full bg-brand-600"></span>
+                2. 確認名片資訊與現場接洽重點
+              </h2>
+              <button type="button" onclick="resetCaptureForm()" class="text-xs text-slate-400 hover:text-slate-600 underline">清空重填</button>
+            </div>
+
+            <!-- 名片基本欄位 Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">姓名 <span class="text-rose-500">*</span></label>
+                <input type="text" id="fieldName" required placeholder="例如：王大明 / David Wang" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">職稱</label>
+                <input type="text" id="fieldTitle" placeholder="例如：採購經理 / VP of Sales" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500" />
+              </div>
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-semibold text-slate-700 mb-1">公司名稱 <span class="text-rose-500">*</span></label>
+                <input type="text" id="fieldCompany" required placeholder="例如：台灣精密工業股份有限公司" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">電話 / 手機</label>
+                <input type="tel" id="fieldPhone" placeholder="例如：0912-345-678" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Email (用於自動寄感謝信)</label>
+                <input type="email" id="fieldEmail" placeholder="name@company.com" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500" />
+              </div>
+            </div>
+
+            <!-- 接洽重點欄位 (支援語音輸入) -->
+            <div class="pt-1">
+              <div class="flex items-center justify-between mb-1.5">
+                <label for="fieldNotes" class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <span>📝 接洽重點 / 討論內容</span>
+                  <span class="text-[11px] font-normal text-slate-400">(將自動帶入感謝信)</span>
+                </label>
+                <!-- 語音輸入按鈕 -->
+                <button type="button" id="voiceInputBtn" onclick="toggleVoiceInput()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 active:scale-95 transition">
+                  <svg id="voiceMicIcon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"></path>
+                  </svg>
+                  <span id="voiceBtnLabel">🎙️ 語音輸入重點</span>
+                </button>
+              </div>
+
+              <!-- 語音辨識即時狀態提示條 -->
+              <div id="voiceStatusBanner" class="hidden mb-2 px-3 py-2 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-rose-600 recording-pulse"></span>
+                  <span id="voiceInterimText" class="font-medium">請開始說話（支援繁體中文）...</span>
+                </div>
+                <button type="button" onclick="stopVoiceInput()" class="text-[11px] font-bold underline">停止</button>
+              </div>
+
+              <textarea id="fieldNotes" rows="3" placeholder="可手動輸入或點擊右上角「語音輸入」口述：例如客戶對 X 系列感興趣，預計 Q4 採購 500 台，需提供報價單..." class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"></textarea>
+            </div>
+
+            <!-- 快速後續跟進標籤 (Quick Follow-up Tags) -->
+            <div>
+              <span class="block text-xs font-semibold text-slate-600 mb-1.5">⚡ 快速點選後續跟進項目：</span>
+              <div id="followUpTagsContainer" class="flex flex-wrap gap-1.5">
+                <button type="button" data-tag="寄送產品型錄" onclick="toggleFollowUpTag(this)" class="followup-chip px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 transition">+ 寄送產品型錄</button>
+                <button type="button" data-tag="提供報價單" onclick="toggleFollowUpTag(this)" class="followup-chip px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 transition">+ 提供報價單</button>
+                <button type="button" data-tag="安排線上 Demo" onclick="toggleFollowUpTag(this)" class="followup-chip px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 transition">+ 安排線上 Demo</button>
+                <button type="button" data-tag="高潛力急件" onclick="toggleFollowUpTag(this)" class="followup-chip px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 transition">🔥 高潛力急件</button>
+                <button type="button" data-tag="代理經銷洽談" onclick="toggleFollowUpTag(this)" class="followup-chip px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 transition">+ 代理經銷洽談</button>
+              </div>
+            </div>
+
+            <!-- 底部雙主要操作按鈕 -->
+            <div class="pt-3 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <button type="submit" class="w-full py-3 px-4 rounded-xl text-sm font-bold text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-300 active:scale-[0.99] transition flex items-center justify-center gap-2">
+                <svg class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span>僅儲存至活動頁籤</span>
+              </button>
+              <button type="button" onclick="handleSaveAndSendEmail()" class="w-full py-3 px-4 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-brand-700 to-brand-600 hover:from-brand-800 hover:to-brand-700 shadow-md shadow-brand-600/20 active:scale-[0.99] transition flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+                <span>儲存並寄出感謝信</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         VIEW 2: 🗂️ 活動名片庫 & 查找 (Event Sheet Tabs & Search)
+         ================================================================ -->
+    <section id="view-directory" class="hidden space-y-4 animate-slide-up">
+      <!-- 模擬 Google Sheet 獨立分頁列 (Event Sheet Tabs Bar) -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
+        <div class="px-4 pt-3 pb-1 flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-1.5 text-xs font-bold text-slate-600">
+            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <span>Google Sheet「<a href="https://docs.google.com/spreadsheets/d/1fKlR1HJeBueQCEAu83FkegSWd2f5OZMC_S3O3-z8ZHw/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="text-emerald-700 underline">展會與論壇名片幫手</a>」獨立活動頁籤：</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" id="batchSyncBtn" onclick="batchSyncUnsyncedContacts()" class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-200 transition">
+              <span>☁️ 批次補同步至 Google Sheet</span>
+              <span id="unsyncedCountBadge" class="px-1.5 py-0.2 rounded-full bg-emerald-600 text-white text-[10px]">0</span>
+            </button>
+            <button type="button" id="clearDemoBtn" onclick="clearDemoContacts()" class="hidden text-[11px] font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 px-2 py-1 rounded-lg border border-amber-200 transition">
+              清除範例資料
+            </button>
+          </div>
+        </div>
+
+        <!-- 仿 Google Sheet 分頁標籤列 -->
+        <div id="sheetTabsBar" class="px-3 pt-1 flex items-center gap-1.5 overflow-x-auto no-scrollbar bg-slate-100/80 border-b border-slate-200">
+          <!-- 由 JS 動態產生各活動獨立頁籤 -->
+        </div>
+
+        <!-- 查找與匯出工具列 -->
+        <div class="p-3.5 sm:p-4 space-y-3 bg-white">
+          <div class="flex flex-col sm:flex-row gap-2">
+            <!-- 關鍵字搜尋框 -->
+            <div class="relative flex-1">
+              <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path stroke-linecap="round" d="M21 21l-4.35-4.35"></path>
+              </svg>
+              <input type="text" id="searchInput" oninput="renderDirectory()" placeholder="搜尋姓名、公司、職稱、電話、Email 或接洽重點關鍵字..." class="w-full pl-9 pr-8 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+              <button type="button" id="clearSearchBtn" onclick="clearSearchInput()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold px-1">✕</button>
+            </div>
+
+            <!-- 匯出按鈕群組 -->
+            <div class="flex items-center gap-2 shrink-0">
+              <button type="button" onclick="exportCurrentTabCSV()" class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition">
+                <span>📥 匯出 CSV</span>
+              </button>
+              <button type="button" onclick="exportCurrentTabVCard()" class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-bold text-brand-700 bg-brand-50 hover:bg-brand-100 border border-brand-200 transition">
+                <span>📇 匯出 vCard</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 狀態快速篩選膠囊 -->
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+              <button type="button" data-filter="all" onclick="setDirectoryFilter('all')" class="dir-filter-pill px-3 py-1 rounded-full text-xs font-bold bg-slate-900 text-white transition">全部名片</button>
+              <button type="button" data-filter="unsent" onclick="setDirectoryFilter('unsent')" class="dir-filter-pill px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">⏳ 未寄感謝信</button>
+              <button type="button" data-filter="sent" onclick="setDirectoryFilter('sent')" class="dir-filter-pill px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">✅ 已寄感謝信</button>
+              <button type="button" data-filter="followup" onclick="setDirectoryFilter('followup')" class="dir-filter-pill px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">🔥 待跟進</button>
+            </div>
+            <span id="directoryResultSummary" class="text-xs text-slate-500 font-medium">顯示 0 筆名片</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 名片卡片清單容器 -->
+      <div id="contactsListContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+        <!-- 由 JS 動態渲染名片卡片 -->
+      </div>
+    </section>
+
+    <!-- ================================================================
+         VIEW 3: ✉️ 感謝函範本編輯與預覽 (Thank-You Email Template)
+         ================================================================ -->
+    <section id="view-template" class="hidden space-y-4 animate-slide-up">
+      <!-- Gmail 綁定狀態橫幅 -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-sm font-bold text-slate-900">寄件信箱綁定狀態：</span>
+            <span id="gmailBindBadge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">尚未綁定 Gmail</span>
+          </div>
+          <p id="gmailBindDesc" class="text-xs text-slate-500">請先在「串接設定」貼上 Apps Script 網址並測試連線，即可由您的 Gmail 自動發出感謝函。</p>
+        </div>
+        <button type="button" onclick="openSettingsModal()" class="px-3.5 py-2 rounded-xl text-xs font-bold text-brand-700 bg-brand-50 hover:bg-brand-100 border border-brand-200 transition shrink-0">
+          前往設定 Gmail 與串接 →
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+        <!-- 左側：編輯感謝函範本 (7 cols) -->
+        <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 space-y-4 shadow-2xs">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm sm:text-base font-bold text-slate-900">編輯個人化感謝函範本</h2>
+            <button type="button" onclick="resetDefaultTemplate()" class="text-xs text-slate-400 hover:text-slate-600 underline">恢復預設範本</button>
+          </div>
+
+          <!-- 動態變數插入按鈕 -->
+          <div>
+            <span class="block text-xs font-semibold text-slate-600 mb-1.5">點擊插入名片動態變數（發信時自動替換）：</span>
+            <div class="flex flex-wrap gap-1.5">
+              <button type="button" onclick="insertTemplateVar('{{姓名}}')" class="px-2.5 py-1 rounded-lg text-xs font-mono font-semibold bg-brand-50 text-brand-700 border border-brand-200 hover:bg-brand-100">{{姓名}}</button>
+              <button type="button" onclick="insertTemplateVar('{{職稱}}')" class="px-2.5 py-1 rounded-lg text-xs font-mono font-semibold bg-brand-50 text-brand-700 border border-brand-200 hover:bg-brand-100">{{職稱}}</button>
+              <button type="button" onclick="insertTemplateVar('{{公司}}')" class="px-2.5 py-1 rounded-lg text-xs font-mono font-semibold bg-brand-50 text-brand-700 border border-brand-200 hover:bg-brand-100">{{公司}}</button>
+              <button type="button" onclick="insertTemplateVar('{{活動名稱}}')" class="px-2.5 py-1 rounded-lg text-xs font-mono font-semibold bg-brand-50 text-brand-700 border border-brand-200 hover:bg-brand-100">{{活動名稱}}</button>
+              <button type="button" onclick="insertTemplateVar('{{討論重點}}')" class="px-2.5 py-1 rounded-lg text-xs font-mono font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100">{{討論重點}}</button>
+              <button type="button" onclick="insertTemplateVar('{{後續跟進}}')" class="px-2.5 py-1 rounded-lg text-xs font-mono font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100">{{後續跟進}}</button>
+              <button type="button" onclick="insertTemplateVar('{{我的姓名}}')" class="px-2.5 py-1 rounded-lg text-xs font-mono font-semibold bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200">{{我的姓名}}</button>
+              <button type="button" onclick="insertTemplateVar('{{我的公司}}')" class="px-2.5 py-1 rounded-lg text-xs font-mono font-semibold bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200">{{我的公司}}</button>
+            </div>
+          </div>
+
+          <div>
+            <label for="tplSubjectInput" class="block text-xs font-semibold text-slate-700 mb-1">信件主旨</label>
+            <input type="text" id="tplSubjectInput" onfocus="lastFocusedTplField = this" oninput="updateTemplatePreview()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+          </div>
+
+          <div>
+            <label for="tplBodyInput" class="block text-xs font-semibold text-slate-700 mb-1">信件內文</label>
+            <textarea id="tplBodyInput" rows="10" onfocus="lastFocusedTplField = this" oninput="updateTemplatePreview()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-brand-500"></textarea>
+          </div>
+
+          <div class="flex justify-end">
+            <button type="button" onclick="saveEmailTemplate()" class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-brand-600 hover:bg-brand-700 shadow-xs transition">
+              💾 儲存感謝函範本
+            </button>
+          </div>
+        </div>
+
+        <!-- 右側：即時預覽效果 (5 cols) -->
+        <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 space-y-3 shadow-2xs">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold text-slate-900">即時套用預覽</h3>
+            <span class="text-[11px] text-slate-400">以最新一筆名片模擬</span>
+          </div>
+
+          <div class="space-y-2 text-xs bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <div class="flex gap-2">
+              <span class="text-slate-400 font-semibold w-14 shrink-0">寄件人：</span>
+              <span id="previewSender" class="text-slate-800 font-medium truncate">尚未設定 Gmail</span>
+            </div>
+            <div class="flex gap-2">
+              <span class="text-slate-400 font-semibold w-14 shrink-0">收件人：</span>
+              <span id="previewRecipient" class="text-brand-700 font-semibold truncate">eric.lin@phison-demo.tw</span>
+            </div>
+            <div class="flex gap-2">
+              <span class="text-slate-400 font-semibold w-14 shrink-0">主旨：</span>
+              <span id="previewSubject" class="text-slate-900 font-bold"></span>
+            </div>
+          </div>
+
+          <div class="p-3.5 rounded-xl border border-slate-200 bg-white text-xs sm:text-sm text-slate-700 whitespace-pre-wrap leading-relaxed min-h-[220px]" id="previewBody"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==================== MODAL 1: 管理活動 (建立/編輯/刪除活動頁籤) ==================== -->
+  <div id="eventsModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden animate-slide-up">
+      <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div>
+          <h3 class="text-base font-bold text-slate-900">管理參展活動與獨立頁籤</h3>
+          <p class="text-xs text-slate-500 mt-0.5">新增活動時，系統與 Google Sheet 將自動建立專屬獨立頁籤</p>
+        </div>
+        <button type="button" onclick="closeEventsModal()" class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200 flex items-center justify-center font-bold">✕</button>
+      </div>
+
+      <div class="p-5 overflow-y-auto space-y-5">
+        <!-- 新增 / 編輯活動表單 -->
+        <form id="eventForm" onsubmit="handleSaveEvent(event)" class="p-4 rounded-xl bg-brand-50/50 border border-brand-200 space-y-3">
+          <input type="hidden" id="editEventId" value="" />
+          <div class="flex items-center justify-between">
+            <span id="eventFormTitle" class="text-xs font-bold text-brand-800">➕ 新增參展活動（自動開立新 Google Sheet 頁籤）</span>
+            <button type="button" id="cancelEditEventBtn" onclick="resetEventForm()" class="hidden text-xs text-slate-500 underline">取消編輯</button>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">活動 / 展覽名稱（即 Google Sheet 頁籤名稱）<span class="text-rose-500">*</span></label>
+            <input type="text" id="eventNameInput" required placeholder="例如：2026 台北國際自動化工業大展" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+          </div>
+          <div class="grid grid-cols-2 gap-2.5">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">展期日期</label>
+              <input type="text" id="eventDateInput" placeholder="例如：2026-08-19 ~ 08-22" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">我方攤位編號</label>
+              <input type="text" id="eventBoothInput" placeholder="例如：南港1館 K412" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+            </div>
+          </div>
+          <button type="submit" id="saveEventSubmitBtn" class="w-full py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-brand-600 hover:bg-brand-700 transition shadow-xs">
+            建立活動並開立專屬頁籤
+          </button>
+        </form>
+
+        <!-- 現有活動頁籤清單 -->
+        <div class="space-y-2">
+          <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">現有活動頁籤清單：</h4>
+          <div id="eventsManageList" class="space-y-2">
+            <!-- 由 JS 動態填入 -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 2: 串接設定 (Gmail 綁定 + Google Sheet 自動分頁 GAS) ==================== -->
+  <div id="settingsModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden animate-slide-up">
+      <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div>
+          <h3 class="text-base font-bold text-slate-900">Google Sheet「展會與論壇名片幫手」& Gmail 串接設定</h3>
+          <p class="text-xs text-slate-500 mt-0.5">已預先綁定您的試算表 ID，貼上 Apps Script 網址即可全自動同步分頁與寄信</p>
+        </div>
+        <button type="button" onclick="closeSettingsModal()" class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200 flex items-center justify-center font-bold">✕</button>
+      </div>
+
+      <!-- 設定子分頁切換 -->
+      <div class="flex border-b border-slate-200 bg-white px-5 pt-2 gap-4">
+        <button type="button" id="setTab-general" onclick="switchSettingsSubTab('general')" class="pb-2.5 text-xs sm:text-sm font-bold border-b-2 border-brand-600 text-brand-700">1. 試算表連線與 Gmail 設定</button>
+        <button type="button" id="setTab-gas" onclick="switchSettingsSubTab('gas')" class="pb-2.5 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800">2. 專屬 Code.gs 程式碼（已預填試算表 ID）</button>
+      </div>
+
+      <div class="p-5 overflow-y-auto space-y-4">
+        <!-- 已綁定 Google Sheet 資訊卡片 -->
+        <div class="p-3.5 rounded-xl bg-emerald-50/80 border border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs font-bold text-emerald-900">📊 已綁定目標 Google Sheet：展會與論壇名片幫手</span>
+            </div>
+            <p class="text-[11px] font-mono text-emerald-700 mt-0.5 truncate">ID: 1fKlR1HJeBueQCEAu83FkegSWd2f5OZMC_S3O3-z8ZHw</p>
+          </div>
+          <a href="https://docs.google.com/spreadsheets/d/1fKlR1HJeBueQCEAu83FkegSWd2f5OZMC_S3O3-z8ZHw/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition shrink-0 shadow-2xs">
+            <span>開啟試算表 ↗</span>
+          </a>
+        </div>
+
+        <!-- 子分頁 1: 表單設定 -->
+        <form id="settingsForm" onsubmit="handleSaveAndTestSettings(event)" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">寄件人姓名（感謝信署名）</label>
+              <input type="text" id="setSenderName" placeholder="例如：陳冠宇 Alex Chen" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">我方公司名稱</label>
+              <input type="text" id="setSenderCompany" placeholder="例如：宏達智能科技有限公司" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">綁定寄件 Gmail 帳號</label>
+            <input type="email" id="setSenderGmail" placeholder="your.name@gmail.com（測試連線時亦會自動偵測授權帳號）" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-xs font-semibold text-slate-700">Google Apps Script 網頁應用程式網址 (Web App URL)</label>
+              <button type="button" onclick="switchSettingsSubTab('gas')" class="text-[11px] font-bold text-brand-600 hover:underline">取得 Code.gs 程式碼 →</button>
+            </div>
+            <input type="url" id="setGasUrl" placeholder="https://script.google.com/macros/s/xxxxxx/exec" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-500" />
+            <p class="text-[11px] text-slate-500 mt-1">部署「2. 專屬 Code.gs 程式碼」後將網址貼於此處，即可自動為每個活動開新頁籤、寫入名片並由您的 Gmail 寄感謝信。</p>
+          </div>
+
+          <!-- 連線測試回饋訊息區 -->
+          <div id="gasTestResultBox" class="hidden p-3 rounded-xl border text-xs leading-relaxed"></div>
+
+          <div class="pt-2 border-t border-slate-100">
+            <label class="block text-xs font-semibold text-slate-700 mb-1">選填：自訂 Gemini API Key（若在本平台外獨立部署時使用）</label>
+            <input type="password" id="setCustomGeminiKey" placeholder="預設留空即可自動使用內建 AI 辨識服務" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-500" />
+          </div>
+
+          <div class="flex flex-wrap justify-end gap-2 pt-2">
+            <button type="button" onclick="closeSettingsModal()" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200">關閉</button>
+            <button type="submit" id="saveAndTestBtn" class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-brand-700 hover:bg-brand-800 shadow-sm flex items-center gap-1.5">
+              <span>💾 儲存並測試連線</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- 子分頁 2: GAS 程式碼與部署說明 -->
+        <div id="settingsGasPanel" class="hidden space-y-3">
+          <div class="p-3.5 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-900 space-y-1.5 leading-relaxed">
+            <p class="font-bold">🚀 4 步驟啟用「展會與論壇名片幫手」自動分頁與 Gmail 發信：</p>
+            <ol class="list-decimal list-inside space-y-1">
+              <li>開啟您的試算表「<a href="https://docs.google.com/spreadsheets/d/1fKlR1HJeBueQCEAu83FkegSWd2f5OZMC_S3O3-z8ZHw/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="underline font-bold">展會與論壇名片幫手</a>」→ 點選上方選單 <b>「擴充功能」&gt;「Apps Script」</b>。</li>
+              <li>清空編輯器原有內容，貼上以下程式碼（已預先綁定試算表 ID）並按 <b>Ctrl+S 儲存</b>。</li>
+              <li>點選右上角 <b>「部署」&gt;「新增部署作業」</b>，類型選 <b>「網頁應用程式」</b>，執行身分選 <b>「我」</b>，誰可以存取選 <b>「所有人」</b>。</li>
+              <li>完成 Google 帳號授權後複製 <b>網頁應用程式網址</b>，貼回左側「1. 試算表連線與 Gmail 設定」並按「儲存並測試連線」！</li>
+            </ol>
+          </div>
+
+          <div class="relative">
+            <button type="button" onclick="copyGasCode()" class="absolute right-2.5 top-2.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-white shadow-sm transition">
+              📋 一鍵複製 Code.gs
+            </button>
+            <textarea id="gasCodeTextarea" readonly rows="15" class="w-full rounded-xl bg-slate-900 text-emerald-300 font-mono text-[11px] p-3.5 pt-11 leading-relaxed focus:outline-none">// 展會與論壇名片幫手 - Google Sheet 自動獨立分頁 & Gmail 自動寄感謝信 (Code.gs)
+const SPREADSHEET_ID = '1fKlR1HJeBueQCEAu83FkegSWd2f5OZMC_S3O3-z8ZHw';
+
+function doGet(e) {
+  try {
+    var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    var tabs = ss.getSheets().map(function(s) { return s.getName(); });
+    var email = '';
+    try { email = Session.getActiveUser().getEmail(); } catch (err) {}
+    return jsonResponse_({
+      ok: true,
+      sheetName: ss.getName(),
+      email: email,
+      tabs: tabs
+    });
+  } catch (err) {
+    return jsonResponse_({ ok: false, error: err.toString() });
+  }
+}
+
+function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    var action = data.action;
+
+    // 1. 測試連線狀態與回傳現有活動頁籤
+    if (action === 'ping') {
+      var tabs = ss.getSheets().map(function(s) { return s.getName(); });
+      var email = '';
+      try { email = Session.getActiveUser().getEmail(); } catch (err) {}
+      return jsonResponse_({
+        ok: true,
+        sheetName: ss.getName(),
+        email: email,
+        tabs: tabs
+      });
+    }
+
+    // 2. 開新活動時，自動建立專屬獨立頁籤（不與其他活動混用）
+    if (action === 'createEvent') {
+      var sheet = ensureEventSheet_(ss, data.eventName);
+      return jsonResponse_({ ok: true, tabName: sheet.getName() });
+    }
+
+    // 3. 儲存名片至該活動專屬頁籤（依名片ID檢查是否更新或新增）
+    if (action === 'saveContact') {
+      var targetSheet = ensureEventSheet_(ss, data.eventName);
+      upsertContactRow_(targetSheet, data.contact);
+      return jsonResponse_({ ok: true, tabName: targetSheet.getName() });
+    }
+
+    // 4. 透過綁定的 Gmail 帳號寄出感謝信並回寫寄信狀態與時間
+    if (action === 'sendThankYou') {
+      var eventSheet = ensureEventSheet_(ss, data.eventName);
+      var contact = data.contact || {};
+      var mail = data.emailPayload || {};
+      if (mail.to) {
+        GmailApp.sendEmail(mail.to, mail.subject, mail.body, {
+          name: mail.senderName || '展會業務團隊'
+        });
+      }
+      contact.emailSent = true;
+      contact.emailSentAt = Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyy-MM-dd HH:mm');
+      upsertContactRow_(eventSheet, contact);
+      return jsonResponse_({ ok: true, sentAt: contact.emailSentAt });
+    }
+
+    return jsonResponse_({ ok: false, error: 'Unknown action: ' + action });
+  } catch (err) {
+    return jsonResponse_({ ok: false, error: err.toString() });
+  }
+}
+
+function ensureEventSheet_(ss, rawEventName) {
+  var tabName = String(rawEventName || '未分類活動')
+    .replace(/[\/\\\?\*\[\]:]/g, '-')
+    .trim()
+    .substring(0, 95) || '未分類活動';
+
+  var sheet = ss.getSheetByName(tabName);
+  if (!sheet) {
+    sheet = ss.insertSheet(tabName);
+    var headers = ['建立時間', '姓名', '公司', '職稱', '電話', 'Email', '接洽重點', '後續跟進', '感謝信狀態', '寄信時間', '名片ID'];
+    sheet.appendRow(headers);
+    var headerRange = sheet.getRange(1, 1, 1, headers.length);
+    headerRange.setBackground('#1E3A8A').setFontColor('#FFFFFF').setFontWeight('bold');
+    sheet.setFrozenRows(1);
+    sheet.autoResizeColumns(1, headers.length);
+  }
+  return sheet;
+}
+
+function upsertContactRow_(sheet, c) {
+  if (!c) return;
+  var rowValues = [
+    c.createdAt || Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyy-MM-dd HH:mm'),
+    c.name || '',
+    c.company || '',
+    c.title || '',
+    c.phone || '',
+    c.email || '',
+    c.notes || '',
+    (c.followUpTags || []).join('、'),
+    c.emailSent ? '已寄出' : '未寄出',
+    c.emailSentAt || '',
+    c.id || ''
+  ];
+
+  var lastRow = sheet.getLastRow();
+  if (lastRow >= 2 && c.id) {
+    var idRange = sheet.getRange(2, 11, lastRow - 1, 1).getValues();
+    for (var i = 0; i < idRange.length; i++) {
+      if (String(idRange[i][0]) === String(c.id)) {
+        sheet.getRange(i + 2, 1, 1, rowValues.length).setValues([rowValues]);
+        return;
+      }
+    }
+  }
+  sheet.appendRow(rowValues);
+}
+
+function jsonResponse_(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+}</textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 3: 編輯名片 / 預覽並寄送感謝信 ==================== -->
+  <div id="contactActionModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden animate-slide-up">
+      <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <h3 id="contactModalTitle" class="text-base font-bold text-slate-900">寄送感謝信</h3>
+        <button type="button" onclick="closeContactActionModal()" class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200 flex items-center justify-center font-bold">✕</button>
+      </div>
+      <div id="contactModalBody" class="p-5 overflow-y-auto space-y-4">
+        <!-- 動態填入編輯名片表單或寄信確認視窗 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 懸浮 Toast 通知系統 ==================== -->
+  <div id="toastContainer" class="fixed bottom-4 right-4 left-4 sm:left-auto sm:w-96 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- ==================== 應用程式核心邏輯 (JavaScript) ==================== -->
+  <script>
+    // =========================================================================
+    // 1. 全域狀態與初始預設資料 (State & Pre-bound Google Sheet Constants)
+    // =========================================================================
+    const STORAGE_KEY = 'b2b_expo_card_assistant_v1';
+    const SPREADSHEET_TITLE = '展會與論壇名片幫手';
+    const SPREADSHEET_ID = '1fKlR1HJeBueQCEAu83FkegSWd2f5OZMC_S3O3-z8ZHw';
+    const SPREADSHEET_URL = 'https://docs.google.com/spreadsheets/d/1fKlR1HJeBueQCEAu83FkegSWd2f5OZMC_S3O3-z8ZHw/edit?usp=sharing';
+
+    const DEFAULT_TEMPLATE = {
+      subject: '感謝您蒞臨【{{活動名稱}}】與我們交流｜{{我的公司}}',
+      body: `{{姓名}} {{職稱}} 您好：
+
+非常感謝您於【{{活動名稱}}】期間撥冗蒞臨 {{我的公司}} 展位交流，很高興能與貴司（{{公司}}）建立聯繫！
+
+針對我們在現場討論的重點：
+「{{討論重點}}」
+
+我們已為您安排後續事項（{{後續跟進}}），稍後將提供更完整的產品與合作方案供您參考。若您有任何進一步的需求或問題，歡迎隨時直接回覆此信與我聯繫。
+
+敬祝 商祺
+
+{{我的姓名}}
+{{我的公司}}`
+    };
+
+    const SAMPLE_CARDS = [
+      {
+        name: '陳建宏',
+        company: '台達智造自動化股份有限公司',
+        title: '資深採購協理',
+        phone: '0928-615-890',
+        email: 'jason.chen@delta-smart-demo.com.tw',
+        notes: '詢問智慧產線感測器與 PLC 整合方案，預計 Q4 進行產線升級評估，請提供型錄與初步報價。',
+        tags: ['寄送產品型錄', '提供報價單'],
+        svgBg: '#1e3a8a',
+        langLabel: '繁體中文名片'
+      },
+      {
+        name: 'Michael Vance',
+        company: 'NovaSilicon Technologies Inc.',
+        title: 'VP of Global Supply Chain',
+        phone: '+1 (408) 792-4410',
+        email: 'm.vance@novasilicon-demo.com',
+        notes: 'Looking for Taiwan ODM manufacturing partners for next-gen AI edge gateways. Schedule technical demo next week.',
+        tags: ['安排線上 Demo', '高潛力急件'],
+        svgBg: '#0f172a',
+        langLabel: 'English Business Card'
+      },
+      {
+        name: '佐藤 健一',
+        company: '東京精密ロボティクス株式会社',
+        title: '海外調達部 部長',
+        phone: '+81-3-5555-0182',
+        email: 'k.sato@tokyo-robotics-demo.jp',
+        notes: '日本市場代理與高精密伺服馬達零組件詢價，希望安排下月線上會議洽談經銷合作。',
+        tags: ['代理經銷洽談', '提供報價單'],
+        svgBg: '#312e81',
+        langLabel: '日本語名刺'
+      }
+    ];
+
+    let appState = {
+      events: [],
+      activeEventId: '',
+      viewingTabId: '',
+      directoryFilter: 'all',
+      contacts: [],
+      template: { ...DEFAULT_TEMPLATE },
+      settings: {
+        senderName: '',
+        senderCompany: '',
+        senderGmail: '',
+        gasUrl: '',
+        customGeminiKey: ''
+      }
+    };
+
+    let selectedFollowUpTags = new Set();
+    let lastFocusedTplField = null;
+    let recognition = null;
+    let isRecording = false;
+
+    // =========================================================================
+    // 2. 初始化與本地儲存讀寫 (Local-First Persistence)
+    // =========================================================================
+    function initApp() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          appState = {
+            ...appState,
+            ...parsed,
+            template: { ...DEFAULT_TEMPLATE, ...(parsed.template || {}) },
+            settings: { ...appState.settings, ...(parsed.settings || {}) }
+          };
+        } catch (e) {
+          console.error('Failed to parse saved state:', e);
+        }
+      }
+
+      // 首次開啟時建立預設活動與 2 筆逼真範例名片（可一鍵清除）
+      if (!appState.events || appState.events.length === 0) {
+        const evt1Id = 'evt_' + Date.now();
+        const evt2Id = 'evt_' + (Date.now() + 1);
+        appState.events = [
+          {
+            id: evt1Id,
+            name: '2026 台北國際電腦展 COMPUTEX',
+            date: '2026-06-02 ~ 06-05',
+            booth: '南港展覽館 1 館 J0818'
+          },
+          {
+            id: evt2Id,
+            name: '2026 SEMICON Taiwan 國際半導體展',
+            date: '2026-09-09 ~ 09-11',
+            booth: '南港展覽館 2 館 Q5320'
+          }
+        ];
+        appState.activeEventId = evt1Id;
+        appState.viewingTabId = evt1Id;
+        appState.contacts = [
+          {
+            id: 'card_demo_1',
+            eventId: evt1Id,
+            name: '林志豪 (Eric Lin)',
+            company: '群聯精密科技股份有限公司',
+            title: '資深採購經理',
+            phone: '0912-345-678',
+            email: 'eric.lin@phison-demo.tw',
+            notes: '詢問 Q3 工控級 SSD 模組交期與客製化韌體支援，預計下週內部技術評估。',
+            followUpTags: ['提供報價單', '高潛力急件'],
+            emailSent: true,
+            emailSentAt: '2026-06-02 14:25',
+            syncedToSheet: false,
+            isDemo: true,
+            createdAt: '2026-06-02 14:20'
+          },
+          {
+            id: 'card_demo_2',
+            eventId: evt1Id,
+            name: 'Sarah Jenkins',
+            company: 'Apex Cloud Infrastructure Inc.',
+            title: 'VP of Hardware Sourcing',
+            phone: '+1 (408) 555-0194',
+            email: 's.jenkins@apexcloud-demo.com',
+            notes: '對高密度 AI 伺服器散熱解決方案感興趣，希望安排下週三線上會議並提供英文版型錄。',
+            followUpTags: ['安排線上 Demo', '寄送產品型錄'],
+            emailSent: false,
+            emailSentAt: '',
+            syncedToSheet: false,
+            isDemo: true,
+            createdAt: '2026-06-02 15:10'
+          }
+        ];
+        saveState();
+      }
+
+      if (!appState.activeEventId || !appState.events.find(e => e.id === appState.activeEventId)) {
+        appState.activeEventId = appState.events[0].id;
+      }
+      if (!appState.viewingTabId) {
+        appState.viewingTabId = appState.activeEventId;
+      }
+
+      initSpeechRecognition();
+      syncAllUI();
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } catch (e) {
+        showToast('本機儲存空間已滿，建議先匯出 CSV 備份資料', 'warning');
+      }
+    }
+
+    function syncAllUI() {
+      renderEventDropdown();
+      updateCaptureHeaderInfo();
+      updateSettingsIndicators();
+      renderDirectory();
+      loadTemplateToEditor();
+    }
+
+    // =========================================================================
+    // 3. 活動管理與 Google Sheet 獨立分頁機制 (Event & Sheet Tab Management)
+    // =========================================================================
+    function renderEventDropdown() {
+      const select = document.getElementById('activeEventSelect');
+      select.innerHTML = appState.events.map(ev => {
+        const count = appState.contacts.filter(c => c.eventId === ev.id).length;
+        return `<option value="${ev.id}" ${ev.id === appState.activeEventId ? 'selected' : ''}>${escapeHtml(ev.name)} (${count} 張)</option>`;
+      }).join('');
+
+      const activeCount = appState.contacts.filter(c => c.eventId === appState.activeEventId).length;
+      document.getElementById('totalEventCountBadge').textContent = activeCount;
+    }
+
+    function handleEventSwitch(newEventId) {
+      appState.activeEventId = newEventId;
+      appState.viewingTabId = newEventId;
+      saveState();
+      syncAllUI();
+      const ev = getActiveEvent();
+      showToast(`已切換至活動「${ev.name}」專屬頁籤`, 'info');
+    }
+
+    function getActiveEvent() {
+      return appState.events.find(e => e.id === appState.activeEventId) || appState.events[0];
+    }
+
+    function updateCaptureHeaderInfo() {
+      const ev = getActiveEvent();
+      if (!ev) return;
+      document.getElementById('captureTargetSheetName').textContent = ev.name;
+      const metaParts = [];
+      if (ev.date) metaParts.push(`展期：${ev.date}`);
+      if (ev.booth) metaParts.push(`攤位：${ev.booth}`);
+      document.getElementById('captureEventMeta').textContent = metaParts.join(' ｜ ') || '獨立 Google Sheet 分頁';
+    }
+
+    function openEventsModal() {
+      resetEventForm();
+      renderEventsManageList();
+      document.getElementById('eventsModal').classList.remove('hidden');
+    }
+
+    function closeEventsModal() {
+      document.getElementById('eventsModal').classList.add('hidden');
+    }
+
+    function resetEventForm() {
+      document.getElementById('editEventId').value = '';
+      document.getElementById('eventNameInput').value = '';
+      document.getElementById('eventDateInput').value = '';
+      document.getElementById('eventBoothInput').value = '';
+      document.getElementById('eventFormTitle').textContent = '➕ 新增參展活動（自動開立新 Google Sheet 頁籤）';
+      document.getElementById('saveEventSubmitBtn').textContent = '建立活動並開立專屬頁籤';
+      document.getElementById('cancelEditEventBtn').classList.add('hidden');
+    }
+
+    function renderEventsManageList() {
+      const container = document.getElementById('eventsManageList');
+      container.innerHTML = appState.events.map(ev => {
+        const count = appState.contacts.filter(c => c.eventId === ev.id).length;
+        const isCurrent = ev.id === appState.activeEventId;
+        return `
+          <div class="p-3 rounded-xl border ${isCurrent ? 'border-brand-300 bg-brand-50/40' : 'border-slate-200 bg-white'} flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5">
+                <span class="text-xs font-bold text-slate-900 truncate">${escapeHtml(ev.name)}</span>
+                ${isCurrent ? '<span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-brand-600 text-white shrink-0">使用中</span>' : ''}
+              </div>
+              <div class="text-[11px] text-slate-500 mt-0.5">
+                頁籤名片數：<b class="text-slate-700">${count}</b> 張 ${ev.date ? `・${escapeHtml(ev.date)}` : ''} ${ev.booth ? `・${escapeHtml(ev.booth)}` : ''}
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button type="button" onclick="startEditEvent('${ev.id}')" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200">編輯</button>
+              ${appState.events.length > 1 ? `
+                <button type="button" id="delEvtBtn_${ev.id}" onclick="confirmDeleteEvent('${ev.id}')" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100">刪除</button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function startEditEvent(eventId) {
+      const ev = appState.events.find(e => e.id === eventId);
+      if (!ev) return;
+      document.getElementById('editEventId').value = ev.id;
+      document.getElementById('eventNameInput').value = ev.name;
+      document.getElementById('eventDateInput').value = ev.date || '';
+      document.getElementById('eventBoothInput').value = ev.booth || '';
+      document.getElementById('eventFormTitle').textContent = '✏️ 編輯活動資訊';
+      document.getElementById('saveEventSubmitBtn').textContent = '儲存活動變更';
+      document.getElementById('cancelEditEventBtn').classList.remove('hidden');
+    }
+
+    async function handleSaveEvent(e) {
+      e.preventDefault();
+      const editId = document.getElementById('editEventId').value.trim();
+      const name = document.getElementById('eventNameInput').value.trim();
+      const date = document.getElementById('eventDateInput').value.trim();
+      const booth = document.getElementById('eventBoothInput').value.trim();
+
+      if (!name) return;
+
+      if (editId) {
+        const idx = appState.events.findIndex(ev => ev.id === editId);
+        if (idx !== -1) {
+          appState.events[idx] = { ...appState.events[idx], name, date, booth };
+          showToast(`已更新活動「${name}」`, 'success');
+        }
+      } else {
+        // 檢查是否已有同名頁籤
+        if (appState.events.some(ev => ev.name === name)) {
+          showToast('已有相同名稱的活動頁籤，請使用不同名稱區分', 'warning');
+          return;
+        }
+        const newId = 'evt_' + Date.now();
+        appState.events.unshift({ id: newId, name, date, booth });
+        appState.activeEventId = newId;
+        appState.viewingTabId = newId;
+
+        // 若有設定 Google Apps Script，通知 Google Sheet 自動建立獨立新頁籤
+        if (appState.settings.gasUrl) {
+          postToGas({ action: 'createEvent', eventName: name });
+          showToast(`已建立「${name}」並通知 Google Sheet 開立獨立新頁籤！`, 'success');
+        } else {
+          showToast(`已建立活動「${name}」本機頁籤（貼上 GAS 網址後可同步至雲端表單）`, 'success');
+        }
+      }
+
+      saveState();
+      resetEventForm();
+      renderEventsManageList();
+      syncAllUI();
+    }
+
+    let pendingDeleteEventId = null;
+    function confirmDeleteEvent(eventId) {
+      const btn = document.getElementById(`delEvtBtn_${eventId}`);
+      if (pendingDeleteEventId !== eventId) {
+        pendingDeleteEventId = eventId;
+        btn.textContent = '確定刪除？';
+        btn.classList.remove('bg-rose-50', 'text-rose-600');
+        btn.classList.add('bg-rose-600', 'text-white');
+        setTimeout(() => {
+          if (pendingDeleteEventId === eventId) {
+            pendingDeleteEventId = null;
+            renderEventsManageList();
+          }
+        }, 3500);
+        return;
+      }
+
+      pendingDeleteEventId = null;
+      appState.events = appState.events.filter(e => e.id !== eventId);
+      appState.contacts = appState.contacts.filter(c => c.eventId !== eventId);
+      if (appState.activeEventId === eventId) {
+        appState.activeEventId = appState.events[0].id;
+      }
+      if (appState.viewingTabId === eventId) {
+        appState.viewingTabId = appState.activeEventId;
+      }
+      saveState();
+      renderEventsManageList();
+      syncAllUI();
+      showToast('已刪除該活動及其名片頁籤', 'info');
+    }
+
+    // =========================================================================
+    // 4. AI 名片拍照辨識 (Gemini Multimodal Vision OCR) & 範例名片
+    // =========================================================================
+    async function handleCardImageSelected(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      try {
+        // 壓縮影像以加快展場行動網路上傳與 AI 辨識速度
+        const compressedBase64DataUrl = await compressImageFile(file, 1280, 0.85);
+        const previewImg = document.getElementById('cardPreviewImg');
+        previewImg.src = compressedBase64DataUrl;
+        previewImg.classList.remove('hidden');
+        document.getElementById('cameraPlaceholder').classList.add('hidden');
+
+        // 取出純 base64 字串
+        const base64Data = compressedBase64DataUrl.split(',')[1];
+        await runGeminiBusinessCardOCR(base64Data, 'image/jpeg');
+      } catch (err) {
+        console.error(err);
+        showToast('圖片讀取失敗，請重新拍攝或手動輸入', 'error');
+      } finally {
+        event.target.value = '';
+      }
+    }
+
+    function compressImageFile(file, maxDim, quality) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            let w = img.width;
+            let h = img.height;
+            if (w > maxDim || h > maxDim) {
+              if (w > h) {
+                h = Math.round((h * maxDim) / w);
+                w = maxDim;
+              } else {
+                w = Math.round((w * maxDim) / h);
+                h = maxDim;
+              }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function runGeminiBusinessCardOCR(base64ImageData, mimeType) {
+      const overlay = document.getElementById('ocrLoadingOverlay');
+      overlay.classList.remove('hidden');
+
+      const apiKey = (appState.settings.customGeminiKey || '').trim();
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+      const payload = {
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              {
+                text: 'You are an expert B2B business card OCR extractor. Extract the contact details from this business card image accurately. Support Traditional Chinese, Simplified Chinese, English, Japanese, Korean, and multilingual cards. If both local language and English names exist, combine them naturally like "王大明 (David Wang)" or keep the primary clear name. Return clean JSON.'
+              },
+              {
+                inlineData: {
+                  mimeType: mimeType,
+                  data: base64ImageData
+                }
+              }
+            ]
+          }
+        ],
+        generationConfig: {
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: 'OBJECT',
+            properties: {
+              name: { type: 'STRING', description: 'Person full name' },
+              company: { type: 'STRING', description: 'Company or organization name' },
+              title: { type: 'STRING', description: 'Job title or department + title' },
+              phone: { type: 'STRING', description: 'Mobile or direct office phone number' },
+              email: { type: 'STRING', description: 'Email address' },
+              extraNote: { type: 'STRING', description: 'Website or brief address if useful, else empty string' }
+            },
+            required: ['name', 'company', 'title', 'phone', 'email']
+          }
+        }
+      };
+
+      try {
+        const result = await fetchWithExponentialBackoff(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const rawText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!rawText) throw new Error('Empty OCR response');
+
+        const parsed = JSON.parse(rawText);
+        document.getElementById('fieldName').value = parsed.name || '';
+        document.getElementById('fieldCompany').value = parsed.company || '';
+        document.getElementById('fieldTitle').value = parsed.title || '';
+        document.getElementById('fieldPhone').value = parsed.phone || '';
+        document.getElementById('fieldEmail').value = parsed.email || '';
+
+        showToast('✨ AI 名片辨識完成！請確認欄位並補充接洽重點', 'success');
+      } catch (err) {
+        console.error('OCR Error:', err);
+        showToast('AI 辨識暫時無法連線（請確認網路或 API 設定），您可直接手動輸入', 'warning');
+      } finally {
+        overlay.classList.add('hidden');
+      }
+    }
+
+    async function fetchWithExponentialBackoff(url, options, maxRetries = 3) {
+      let delay = 1000;
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        const response = await fetch(url, options);
+        if (response.ok) {
+          return await response.json();
+        }
+        if (attempt === maxRetries || (response.status !== 429 && response.status < 500)) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        await new Promise(res => setTimeout(res, delay));
+        delay *= 2;
+      }
+    }
+
+    // 載入模擬範例名片（方便即時測試）
+    function toggleSampleCardsMenu() {
+      document.getElementById('sampleCardsDrawer').classList.toggle('hidden');
+    }
+
+    function loadSampleCard(index) {
+      const sample = SAMPLE_CARDS[index];
+      if (!sample) return;
+
+      // 產生一張擬真名片視覺縮圖
+      const svgString = `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="380" viewBox="0 0 640 380">
+        <rect width="640" height="380" rx="24" fill="${sample.svgBg}"/>
+        <circle cx="580" cy="60" r="110" fill="#ffffff" fill-opacity="0.06"/>
+        <text x="44" y="75" fill="#93c5fd" font-family="sans-serif" font-size="18" font-weight="bold">${escapeXml(sample.company)}</text>
+        <text x="44" y="165" fill="#ffffff" font-family="sans-serif" font-size="40" font-weight="bold">${escapeXml(sample.name)}</text>
+        <text x="44" y="208" fill="#cbd5e1" font-family="sans-serif" font-size="22">${escapeXml(sample.title)}</text>
+        <line x1="44" y1="245" x2="596" y2="245" stroke="#ffffff" stroke-opacity="0.2" stroke-width="2"/>
+        <text x="44" y="290" fill="#e2e8f0" font-family="monospace" font-size="20">TEL: ${escapeXml(sample.phone)}</text>
+        <text x="44" y="328" fill="#e2e8f0" font-family="monospace" font-size="20">MAIL: ${escapeXml(sample.email)}</text>
+      </svg>`;
+
+      const previewImg = document.getElementById('cardPreviewImg');
+      previewImg.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
+      previewImg.classList.remove('hidden');
+      document.getElementById('cameraPlaceholder').classList.add('hidden');
+      document.getElementById('sampleCardsDrawer').classList.add('hidden');
+
+      // 模擬短暫 AI 掃描感
+      const overlay = document.getElementById('ocrLoadingOverlay');
+      overlay.classList.remove('hidden');
+      setTimeout(() => {
+        overlay.classList.add('hidden');
+        document.getElementById('fieldName').value = sample.name;
+        document.getElementById('fieldCompany').value = sample.company;
+        document.getElementById('fieldTitle').value = sample.title;
+        document.getElementById('fieldPhone').value = sample.phone;
+        document.getElementById('fieldEmail').value = sample.email;
+        document.getElementById('fieldNotes').value = sample.notes;
+
+        selectedFollowUpTags.clear();
+        document.querySelectorAll('.followup-chip').forEach(btn => {
+          const tag = btn.getAttribute('data-tag');
+          if (sample.tags.includes(tag)) {
+            selectedFollowUpTags.add(tag);
+            setChipSelectedStyle(btn, true);
+          } else {
+            setChipSelectedStyle(btn, false);
+          }
+        });
+        showToast(`已套用「${sample.langLabel}」模擬辨識結果`, 'success');
+      }, 450);
+    }
+
+    // =========================================================================
+    // 5. 語音輸入接洽重點 (Web Speech API - zh-TW)
+    // =========================================================================
+    function initSpeechRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) return;
+
+      recognition = new SpeechRecognition();
+      recognition.lang = 'zh-TW';
+      recognition.continuous = true;
+      recognition.interimResults = true;
+
+      recognition.onstart = () => {
+        isRecording = true;
+        document.getElementById('voiceStatusBanner').classList.remove('hidden');
+        document.getElementById('voiceBtnLabel').textContent = '錄音辨識中...';
+        document.getElementById('voiceInputBtn').classList.add('bg-rose-600', 'text-white');
+        document.getElementById('voiceInputBtn').classList.remove('bg-rose-50', 'text-rose-600');
+      };
+
+      recognition.onresult = (event) => {
+        let interim = '';
+        let finalTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript;
+          } else {
+            interim += event.results[i][0].transcript;
+          }
+        }
+        if (interim) {
+          document.getElementById('voiceInterimText').textContent = `辨識中：「${interim}」`;
+        }
+        if (finalTranscript) {
+          const notesEl = document.getElementById('fieldNotes');
+          const current = notesEl.value.trim();
+          notesEl.value = current ? `${current}，${finalTranscript}` : finalTranscript;
+          document.getElementById('voiceInterimText').textContent = '已寫入重點，請繼續說話...';
+        }
+      };
+
+      recognition.onerror = (event) => {
+        console.warn('Speech recognition error:', event.error);
+        stopVoiceInput();
+        if (event.error === 'not-allowed') {
+          showToast('請允許瀏覽器使用麥克風權限以啟用語音輸入', 'warning');
+        } else {
+          showToast('語音辨識已停止，您可繼續手動輸入', 'info');
+        }
+      };
+
+      recognition.onend = () => {
+        stopVoiceInput();
+      };
+    }
+
+    function toggleVoiceInput() {
+      if (!recognition) {
+        showToast('此瀏覽器不支援網頁語音辨識，建議使用 Chrome / Safari 或鍵盤語音輸入', 'warning');
+        return;
+      }
+      if (isRecording) {
+        stopVoiceInput();
+      } else {
+        try {
+          recognition.start();
+        } catch (e) {
+          stopVoiceInput();
+        }
+      }
+    }
+
+    function stopVoiceInput() {
+      isRecording = false;
+      if (recognition) {
+        try { recognition.stop(); } catch (e) {}
+      }
+      document.getElementById('voiceStatusBanner').classList.add('hidden');
+      document.getElementById('voiceBtnLabel').textContent = '🎙️ 語音輸入重點';
+      document.getElementById('voiceInputBtn').classList.remove('bg-rose-600', 'text-white');
+      document.getElementById('voiceInputBtn').classList.add('bg-rose-50', 'text-rose-600');
+    }
+
+    // 快速後續跟進標籤切換
+    function toggleFollowUpTag(btn) {
+      const tag = btn.getAttribute('data-tag');
+      if (selectedFollowUpTags.has(tag)) {
+        selectedFollowUpTags.delete(tag);
+        setChipSelectedStyle(btn, false);
+      } else {
+        selectedFollowUpTags.add(tag);
+        setChipSelectedStyle(btn, true);
+      }
+    }
+
+    function setChipSelectedStyle(btn, selected) {
+      if (selected) {
+        btn.classList.remove('bg-slate-100', 'text-slate-700', 'border-slate-200');
+        btn.classList.add('bg-brand-600', 'text-white', 'border-brand-600');
+      } else {
+        btn.classList.add('bg-slate-100', 'text-slate-700', 'border-slate-200');
+        btn.classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
+      }
+    }
+
+    function resetCaptureForm() {
+      document.getElementById('cardCaptureForm').reset();
+      document.getElementById('cardPreviewImg').src = '';
+      document.getElementById('cardPreviewImg').classList.add('hidden');
+      document.getElementById('cameraPlaceholder').classList.remove('hidden');
+      selectedFollowUpTags.clear();
+      document.querySelectorAll('.followup-chip').forEach(btn => setChipSelectedStyle(btn, false));
+    }
+
+    // =========================================================================
+    // 6. 儲存名片 + 同步 Google Sheet 專屬頁籤 + 自動發送感謝信
+    // =========================================================================
+    function collectFormContactData() {
+      const name = document.getElementById('fieldName').value.trim();
+      const company = document.getElementById('fieldCompany').value.trim();
+      const title = document.getElementById('fieldTitle').value.trim();
+      const phone = document.getElementById('fieldPhone').value.trim();
+      const email = document.getElementById('fieldEmail').value.trim();
+      const notes = document.getElementById('fieldNotes').value.trim();
+
+      if (!name || !company) {
+        showToast('請至少填寫「姓名」與「公司名稱」', 'warning');
+        return null;
+      }
+
+      const now = new Date();
+      const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+      return {
+        id: 'card_' + Date.now(),
+        eventId: appState.activeEventId,
+        name,
+        company,
+        title,
+        phone,
+        email,
+        notes,
+        followUpTags: Array.from(selectedFollowUpTags),
+        emailSent: false,
+        emailSentAt: '',
+        syncedToSheet: Boolean(appState.settings.gasUrl),
+        createdAt: timestamp
+      };
+    }
+
+    async function handleSaveCard(e, shouldSendEmail = false) {
+      if (e) e.preventDefault();
+      const contact = collectFormContactData();
+      if (!contact) return;
+
+      const activeEv = getActiveEvent();
+      let emailPayload = null;
+
+      if (shouldSendEmail) {
+        if (!contact.email) {
+          showToast('此名片尚未填寫 Email，已先為您儲存名片！', 'warning');
+        } else {
+          emailPayload = buildRenderedEmail(contact, activeEv);
+          contact.emailSent = true;
+          contact.emailSentAt = contact.createdAt;
+        }
+      }
+
+      appState.contacts.unshift(contact);
+      appState.viewingTabId = activeEv.id;
+      saveState();
+
+      // 若有綁定 Google Apps Script，同步寫入該活動專屬 Google Sheet 頁籤（並視需要觸發 Gmail 發信）
+      if (appState.settings.gasUrl) {
+        if (emailPayload) {
+          postToGas({
+            action: 'sendThankYou',
+            eventName: activeEv.name,
+            contact: contact,
+            emailPayload: emailPayload
+          }).then(res => {
+            if (res && res.ok) {
+              contact.syncedToSheet = true;
+              saveState();
+              renderDirectory();
+            }
+          });
+        } else {
+          postToGas({
+            action: 'saveContact',
+            eventName: activeEv.name,
+            contact: contact
+          }).then(res => {
+            if (res && res.ok) {
+              contact.syncedToSheet = true;
+              saveState();
+              renderDirectory();
+            }
+          });
+        }
+      } else if (emailPayload) {
+        // 若尚未綁定 GAS 後端自動寄信，開啟預填好收件人、主旨與感謝信內文的 Gmail 撰寫視窗
+        openGmailComposeFallback(emailPayload);
+      }
+
+      resetCaptureForm();
+      syncAllUI();
+
+      if (emailPayload) {
+        const viaMsg = appState.settings.gasUrl
+          ? `已存入「${activeEv.name}」並透過綁定 Gmail 自動寄出感謝信！`
+          : `已存入「${activeEv.name}」並開啟 Gmail 感謝信撰寫視窗！`;
+        showToast(viaMsg, 'success');
+      } else {
+        const sheetMsg = appState.settings.gasUrl
+          ? `✅ 已儲存並同步至「${SPREADSHEET_TITLE}」▸「${activeEv.name}」頁籤！`
+          : `✅ 已儲存至本機「${activeEv.name}」頁籤（綁定 GAS 後可自動寫入 Google Sheet）`;
+        showToast(sheetMsg, 'success');
+      }
+    }
+
+    function handleSaveAndSendEmail() {
+      handleSaveCard(null, true);
+    }
+
+    function openGmailComposeFallback(emailPayload) {
+      const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(emailPayload.to)}&su=${encodeURIComponent(emailPayload.subject)}&body=${encodeURIComponent(emailPayload.body)}`;
+      window.open(gmailUrl, '_blank', 'noopener,noreferrer');
+    }
+
+    async function postToGas(payload) {
+      const url = (appState.settings.gasUrl || '').trim();
+      if (!url) return null;
+      try {
+        // 使用 text/plain 避免 CORS preflight，並允許跟隨 Google Apps Script 302 重導向以讀取 JSON 回應
+        const response = await fetch(url, {
+          method: 'POST',
+          redirect: 'follow',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+        if (response.ok) {
+          return await response.json();
+        }
+      } catch (err) {
+        // 若瀏覽器環境限制讀取跨網域回應，退回 no-cors 確保資料仍送達 GAS
+        try {
+          await fetch(url, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+          });
+          return { ok: true, opaque: true };
+        } catch (fallbackErr) {
+          console.warn('GAS sync network warning:', fallbackErr);
+        }
+      }
+      return null;
+    }
+
+    // =========================================================================
+    // 7. 感謝函範本渲染與編輯 (Thank-You Email Template Engine)
+    // =========================================================================
+    function buildRenderedEmail(contact, eventObj) {
+      const ev = eventObj || appState.events.find(e => e.id === contact.eventId) || getActiveEvent();
+      const senderName = appState.settings.senderName || '業務代表';
+      const senderCompany = appState.settings.senderCompany || '本公司參展團隊';
+      const notesText = contact.notes || '感謝您對我們產品與解決方案的關注';
+      const followUpText = (contact.followUpTags && contact.followUpTags.length > 0)
+        ? contact.followUpTags.join('、')
+        : '提供完整產品資料與專人聯繫';
+
+      const replaceVars = (str) => {
+        return str
+          .replace(/\{\{姓名\}\}/g, contact.name || '貴賓')
+          .replace(/\{\{職稱\}\}/g, contact.title || '')
+          .replace(/\{\{公司\}\}/g, contact.company || '貴公司')
+          .replace(/\{\{活動名稱\}\}/g, ev ? ev.name : '本次展會')
+          .replace(/\{\{討論重點\}\}/g, notesText)
+          .replace(/\{\{後續跟進\}\}/g, followUpText)
+          .replace(/\{\{我的姓名\}\}/g, senderName)
+          .replace(/\{\{我的公司\}\}/g, senderCompany);
+      };
+
+      return {
+        to: contact.email || '',
+        subject: replaceVars(appState.template.subject),
+        body: replaceVars(appState.template.body),
+        senderName: `${senderName} (${senderCompany})`
+      };
+    }
+
+    function loadTemplateToEditor() {
+      document.getElementById('tplSubjectInput').value = appState.template.subject;
+      document.getElementById('tplBodyInput').value = appState.template.body;
+      updateTemplatePreview();
+    }
+
+    function insertTemplateVar(varToken) {
+      const target = lastFocusedTplField || document.getElementById('tplBodyInput');
+      const start = target.selectionStart || target.value.length;
+      const end = target.selectionEnd || target.value.length;
+      target.value = target.value.substring(0, start) + varToken + target.value.substring(end);
+      target.focus();
+      target.selectionStart = target.selectionEnd = start + varToken.length;
+      updateTemplatePreview();
+    }
+
+    function updateTemplatePreview() {
+      const tempTpl = {
+        subject: document.getElementById('tplSubjectInput').value,
+        body: document.getElementById('tplBodyInput').value
+      };
+      // 取最新一筆有名片的聯絡人作為即時預覽範例
+      const sampleContact = appState.contacts[0] || {
+        name: '林志豪',
+        title: '採購經理',
+        company: '群聯精密科技',
+        email: 'eric.lin@example.com',
+        notes: '詢問工控級模組交期與報價',
+        followUpTags: ['提供報價單']
+      };
+
+      const savedTpl = appState.template;
+      appState.template = tempTpl;
+      const rendered = buildRenderedEmail(sampleContact, getActiveEvent());
+      appState.template = savedTpl;
+
+      const gmail = appState.settings.senderGmail;
+      document.getElementById('previewSender').textContent = gmail
+        ? `${appState.settings.senderName || '我'} <${gmail}>`
+        : '尚未綁定 Gmail（請至右上角串接設定填寫）';
+      document.getElementById('previewRecipient').textContent = `${sampleContact.name} <${rendered.to || 'client@company.com'}>`;
+      document.getElementById('previewSubject').textContent = rendered.subject;
+      document.getElementById('previewBody').textContent = rendered.body;
+    }
+
+    function saveEmailTemplate() {
+      appState.template.subject = document.getElementById('tplSubjectInput').value.trim() || DEFAULT_TEMPLATE.subject;
+      appState.template.body = document.getElementById('tplBodyInput').value.trim() || DEFAULT_TEMPLATE.body;
+      saveState();
+      updateTemplatePreview();
+      showToast('已儲存自訂感謝函範本！', 'success');
+    }
+
+    function resetDefaultTemplate() {
+      appState.template = { ...DEFAULT_TEMPLATE };
+      saveState();
+      loadTemplateToEditor();
+      showToast('已恢復為 B2B 標準感謝函範本', 'info');
+    }
+
+    // =========================================================================
+    // 8. 活動名片庫、分頁檢視、查找與匯出 (Directory, Tabs, Search & Export)
+    // =========================================================================
+    function switchViewingSheetTab(tabId) {
+      appState.viewingTabId = tabId;
+      if (tabId !== 'ALL') {
+        appState.activeEventId = tabId;
+        renderEventDropdown();
+        updateCaptureHeaderInfo();
+      }
+      saveState();
+      renderDirectory();
+    }
+
+    function setDirectoryFilter(filterKey) {
+      appState.directoryFilter = filterKey;
+      document.querySelectorAll('.dir-filter-pill').forEach(pill => {
+        const isSelected = pill.getAttribute('data-filter') === filterKey;
+        if (isSelected) {
+          pill.classList.remove('bg-slate-100', 'text-slate-600');
+          pill.classList.add('bg-slate-900', 'text-white');
+        } else {
+          pill.classList.add('bg-slate-100', 'text-slate-600');
+          pill.classList.remove('bg-slate-900', 'text-white');
+        }
+      });
+      renderDirectory();
+    }
+
+    function clearSearchInput() {
+      document.getElementById('searchInput').value = '';
+      renderDirectory();
+    }
+
+    function getFilteredContacts() {
+      const keyword = (document.getElementById('searchInput')?.value || '').trim().toLowerCase();
+      const clearBtn = document.getElementById('clearSearchBtn');
+      if (clearBtn) clearBtn.classList.toggle('hidden', !keyword);
+
+      return appState.contacts.filter(c => {
+        // 1. 頁籤過濾（單一活動獨立頁籤 or 跨活動全部查找）
+        if (appState.viewingTabId !== 'ALL' && c.eventId !== appState.viewingTabId) {
+          return false;
+        }
+        // 2. 狀態過濾
+        if (appState.directoryFilter === 'unsent' && c.emailSent) return false;
+        if (appState.directoryFilter === 'sent' && !c.emailSent) return false;
+        if (appState.directoryFilter === 'followup') {
+          const hasTags = c.followUpTags && c.followUpTags.length > 0;
+          if (!hasTags && c.emailSent) return false;
+        }
+
+        // 3. 關鍵字查找（姓名、公司、職稱、電話、Email、接洽重點、跟進標籤）
+        if (keyword) {
+          const searchable = [
+            c.name,
+            c.company,
+            c.title,
+            c.phone,
+            c.email,
+            c.notes,
+            ...(c.followUpTags || [])
+          ].join(' ').toLowerCase();
+          if (!searchable.includes(keyword)) return false;
+        }
+        return true;
+      });
+    }
+
+    function renderDirectory() {
+      // 渲染仿 Google Sheet 底部/頂部頁籤列
+      const tabsBar = document.getElementById('sheetTabsBar');
+      const eventTabsHtml = appState.events.map(ev => {
+        const count = appState.contacts.filter(c => c.eventId === ev.id).length;
+        const active = appState.viewingTabId === ev.id;
+        return `
+          <button type="button" onclick="switchViewingSheetTab('${ev.id}')" class="px-3.5 py-2 rounded-t-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 border-t border-x ${
+            active
+              ? 'bg-white text-brand-700 border-slate-200 shadow-2xs -mb-px'
+              : 'bg-slate-200/60 text-slate-600 border-transparent hover:bg-slate-200'
+          }">
+            <span class="w-2 h-2 rounded-full ${active ? 'bg-emerald-500' : 'bg-slate-400'}"></span>
+            <span>${escapeHtml(ev.name)}</span>
+            <span class="px-1.5 py-0.2 rounded-full text-[10px] ${active ? 'bg-brand-100 text-brand-800' : 'bg-slate-300/80 text-slate-700'}">${count}</span>
+          </button>
+        `;
+      }).join('');
+
+      const allActive = appState.viewingTabId === 'ALL';
+      const allTabHtml = `
+        <button type="button" onclick="switchViewingSheetTab('ALL')" class="px-3.5 py-2 rounded-t-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 border-t border-x ${
+          allActive
+            ? 'bg-white text-slate-900 border-slate-200 shadow-2xs -mb-px'
+            : 'bg-slate-200/60 text-slate-600 border-transparent hover:bg-slate-200'
+        }">
+          <span>🔍 跨活動全部查找 (${appState.contacts.length})</span>
+        </button>
+      `;
+
+      tabsBar.innerHTML = eventTabsHtml + allTabHtml;
+
+      // 顯示/隱藏「清除範例資料」按鈕 & 更新未同步筆數徽章
+      const hasDemo = appState.contacts.some(c => c.isDemo);
+      document.getElementById('clearDemoBtn').classList.toggle('hidden', !hasDemo);
+
+      const unsyncedCount = appState.contacts.filter(c => !c.syncedToSheet).length;
+      const unsyncedBadge = document.getElementById('unsyncedCountBadge');
+      if (unsyncedBadge) {
+        unsyncedBadge.textContent = unsyncedCount;
+      }
+
+      // 渲染符合條件的名片清單
+      const filtered = getFilteredContacts();
+      document.getElementById('directoryResultSummary').textContent = `顯示 ${filtered.length} 筆名片`;
+
+      const listContainer = document.getElementById('contactsListContainer');
+      if (filtered.length === 0) {
+        listContainer.innerHTML = `
+          <div class="col-span-full bg-white rounded-2xl border border-dashed border-slate-300 p-10 text-center space-y-2.5">
+            <div class="text-3xl">📇</div>
+            <p class="text-sm font-bold text-slate-800">此活動頁籤目前沒有符合條件的名片</p>
+            <p class="text-xs text-slate-500">切換至「📸 拍名片建檔」開始掃描名片，或調整上方篩選條件</p>
+            <button type="button" onclick="switchMainTab('capture')" class="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 transition">
+              前往拍名片建檔 →
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      listContainer.innerHTML = filtered.map(c => {
+        const ev = appState.events.find(e => e.id === c.eventId);
+        const tagsHtml = (c.followUpTags || []).map(t => {
+          const isUrgent = t === '高潛力急件';
+          return `<span class="px-2 py-0.5 rounded-md text-[11px] font-semibold ${
+            isUrgent ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-brand-50 text-brand-700 border border-brand-200'
+          }">${escapeHtml(t)}</span>`;
+        }).join('');
+
+        return `
+          <article class="bg-white rounded-2xl border border-slate-200 p-4 shadow-2xs hover:border-brand-300 transition flex flex-col justify-between gap-3">
+            <div class="space-y-2.5">
+              <!-- 頂部：公司與寄信狀態徽章 -->
+              <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="text-xs font-bold text-brand-700 truncate">${escapeHtml(c.company)}</span>
+                    ${c.isDemo ? '<span class="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-amber-100 text-amber-800">範例</span>' : ''}
+                    ${appState.viewingTabId === 'ALL' && ev ? `<span class="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">${escapeHtml(ev.name)}</span>` : ''}
+                  </div>
+                  <h3 class="text-base font-bold text-slate-900 mt-0.5">
+                    ${escapeHtml(c.name)}
+                    ${c.title ? `<span class="text-xs font-medium text-slate-500 ml-1.5">${escapeHtml(c.title)}</span>` : ''}
+                  </h3>
+                </div>
+
+                <div class="flex flex-col items-end gap-1 shrink-0">
+                  ${c.emailSent
+                    ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">✓ 已寄感謝信</span>`
+                    : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">⏳ 未寄感謝信</span>`
+                  }
+                  ${c.syncedToSheet
+                    ? `<span class="text-[10px] font-semibold text-emerald-600">☁️ 已同步 Sheet</span>`
+                    : `<span class="text-[10px] font-medium text-slate-400">📱 僅存本機</span>`
+                  }
+                </div>
+              </div>
+
+              <!-- 聯絡方式 -->
+              <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600">
+                ${c.phone ? `<a href="tel:${escapeHtml(c.phone)}" class="hover:text-brand-600 flex items-center gap-1">📞 ${escapeHtml(c.phone)}</a>` : ''}
+                ${c.email ? `<span class="flex items-center gap-1 truncate">✉️ ${escapeHtml(c.email)}</span>` : '<span class="text-slate-400">未填寫 Email</span>'}
+              </div>
+
+              <!-- 接洽重點區塊 -->
+              ${c.notes ? `
+                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-xs text-slate-700 leading-relaxed">
+                  <span class="font-bold text-slate-800">接洽重點：</span>${escapeHtml(c.notes)}
+                </div>
+              ` : ''}
+
+              <!-- 跟進標籤 -->
+              ${tagsHtml ? `<div class="flex flex-wrap gap-1.5">${tagsHtml}</div>` : ''}
+            </div>
+
+            <!-- 底部操作按鈕列 -->
+            <div class="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-1.5">
+              <button type="button" onclick="openQuickSendModal('${c.id}')" class="flex-1 py-2 px-3 rounded-xl text-xs font-bold ${
+                c.emailSent
+                  ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  : 'bg-brand-600 text-white hover:bg-brand-700 shadow-2xs'
+              } transition flex items-center justify-center gap-1">
+                <span>✉️</span>
+                <span>${c.emailSent ? '檢視 / 重寄感謝信' : '一鍵寄感謝信'}</span>
+              </button>
+              <button type="button" onclick="exportSingleVCard('${c.id}')" title="下載單張 vCard" class="p-2 rounded-xl text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition">
+                vCard
+              </button>
+              <button type="button" onclick="openEditContactModal('${c.id}')" title="編輯名片" class="p-2 rounded-xl text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition">
+                編輯
+              </button>
+              <button type="button" id="delCardBtn_${c.id}" onclick="confirmDeleteContact('${c.id}')" title="刪除名片" class="p-2 rounded-xl text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 transition">
+                刪除
+              </button>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    function clearDemoContacts() {
+      appState.contacts = appState.contacts.filter(c => !c.isDemo);
+      saveState();
+      syncAllUI();
+      showToast('已清除範例名片資料', 'info');
+    }
+
+    let pendingDeleteCardId = null;
+    function confirmDeleteContact(cardId) {
+      const btn = document.getElementById(`delCardBtn_${cardId}`);
+      if (pendingDeleteCardId !== cardId) {
+        pendingDeleteCardId = cardId;
+        btn.textContent = '確認?';
+        btn.classList.remove('bg-rose-50', 'text-rose-600');
+        btn.classList.add('bg-rose-600', 'text-white');
+        setTimeout(() => {
+          if (pendingDeleteCardId === cardId) {
+            pendingDeleteCardId = null;
+            renderDirectory();
+          }
+        }, 3000);
+        return;
+      }
+      pendingDeleteCardId = null;
+      appState.contacts = appState.contacts.filter(c => c.id !== cardId);
+      saveState();
+      syncAllUI();
+      showToast('已刪除該筆名片紀錄', 'info');
+    }
+
+    // 單張名片快速寄感謝信預覽 Modal
+    function openQuickSendModal(cardId) {
+      const contact = appState.contacts.find(c => c.id === cardId);
+      if (!contact) return;
+      const rendered = buildRenderedEmail(contact);
+
+      document.getElementById('contactModalTitle').textContent = '✉️ 確認並發送感謝函';
+      document.getElementById('contactModalBody').innerHTML = `
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">收件人 Email</label>
+            <input type="email" id="quickMailTo" value="${escapeHtml(rendered.to)}" placeholder="請輸入客戶 Email" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">信件主旨</label>
+            <input type="text" id="quickMailSubject" value="${escapeHtml(rendered.subject)}" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-medium" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">感謝函內文（已自動帶入名片資訊與接洽重點）</label>
+            <textarea id="quickMailBody" rows="8" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm leading-relaxed">${escapeHtml(rendered.body)}</textarea>
+          </div>
+          <div class="pt-2 flex justify-end gap-2">
+            <button type="button" onclick="closeContactActionModal()" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200">取消</button>
+            <button type="button" onclick="executeQuickSendEmail('${contact.id}')" class="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 shadow-sm">
+              🚀 立即發出感謝信
+            </button>
+          </div>
+        </div>
+      `;
+      document.getElementById('contactActionModal').classList.remove('hidden');
+    }
+
+    function executeQuickSendEmail(cardId) {
+      const contact = appState.contacts.find(c => c.id === cardId);
+      if (!contact) return;
+      const to = document.getElementById('quickMailTo').value.trim();
+      const subject = document.getElementById('quickMailSubject').value.trim();
+      const body = document.getElementById('quickMailBody').value;
+
+      if (!to) {
+        showToast('請填寫收件人 Email', 'warning');
+        return;
+      }
+
+      const now = new Date();
+      const sentTime = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+      contact.email = to;
+      contact.emailSent = true;
+      contact.emailSentAt = sentTime;
+      saveState();
+
+      const senderName = `${appState.settings.senderName || '業務代表'} (${appState.settings.senderCompany || '參展團隊'})`;
+      const evObj = appState.events.find(e => e.id === contact.eventId) || getActiveEvent();
+
+      if (appState.settings.gasUrl) {
+        postToGas({
+          action: 'sendThankYou',
+          eventName: evObj ? evObj.name : '未分類活動',
+          contact: contact,
+          emailPayload: { to, subject, body, senderName }
+        }).then(res => {
+          if (res && res.ok) {
+            contact.syncedToSheet = true;
+            saveState();
+            renderDirectory();
+          }
+        });
+        showToast(`已透過綁定 Gmail 自動寄出感謝信給 ${contact.name}！`, 'success');
+      } else {
+        openGmailComposeFallback({ to, subject, body });
+        showToast(`已開啟 Gmail 撰寫視窗並標記為「已寄感謝信」`, 'success');
+      }
+
+      closeContactActionModal();
+      syncAllUI();
+    }
+
+    async function batchSyncUnsyncedContacts() {
+      if (!appState.settings.gasUrl) {
+        showToast('請先在右上角「串接設定」貼上 Apps Script 網址！', 'warning');
+        openSettingsModal();
+        return;
+      }
+
+      const targets = appState.contacts.filter(c => !c.syncedToSheet);
+      if (targets.length === 0) {
+        showToast('所有名片皆已同步至「展會與論壇名片幫手」試算表！', 'info');
+        return;
+      }
+
+      const btn = document.getElementById('batchSyncBtn');
+      const origHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳ 正在同步中...</span>';
+
+      let successCount = 0;
+      for (const c of targets) {
+        const ev = appState.events.find(e => e.id === c.eventId) || getActiveEvent();
+        const res = await postToGas({
+          action: 'saveContact',
+          eventName: ev ? ev.name : '未分類活動',
+          contact: c
+        });
+        if (res && res.ok) {
+          c.syncedToSheet = true;
+          successCount++;
+        }
+      }
+
+      saveState();
+      btn.disabled = false;
+      btn.innerHTML = origHtml;
+      syncAllUI();
+      showToast(`☁️ 已完成批次同步！共 ${successCount} 筆名片寫入對應活動頁籤`, 'success');
+    }
+
+    // 編輯既有聯絡人 Modal
+    function openEditContactModal(cardId) {
+      const c = appState.contacts.find(item => item.id === cardId);
+      if (!c) return;
+
+      document.getElementById('contactModalTitle').textContent = '✏️ 編輯名片與接洽重點';
+      document.getElementById('contactModalBody').innerHTML = `
+        <form onsubmit="saveEditedContact(event, '${c.id}')" class="space-y-3">
+          <div class="grid grid-cols-2 gap-2.5">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">姓名 *</label>
+              <input type="text" id="editCName" required value="${escapeHtml(c.name)}" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">職稱</label>
+              <input type="text" id="editCTitle" value="${escapeHtml(c.title || '')}" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">公司名稱 *</label>
+            <input type="text" id="editCCompany" required value="${escapeHtml(c.company)}" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+          </div>
+          <div class="grid grid-cols-2 gap-2.5">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">電話</label>
+              <input type="text" id="editCPhone" value="${escapeHtml(c.phone || '')}" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Email</label>
+              <input type="email" id="editCEmail" value="${escapeHtml(c.email || '')}" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">接洽重點</label>
+            <textarea id="editCNotes" rows="3" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm">${escapeHtml(c.notes || '')}</textarea>
+          </div>
+          <div class="pt-2 flex justify-end gap-2">
+            <button type="button" onclick="closeContactActionModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 bg-slate-100">取消</button>
+            <button type="submit" class="px-5 py-2 rounded-xl text-xs font-bold text-white bg-brand-600 hover:bg-brand-700">儲存變更</button>
+          </div>
+        </form>
+      `;
+      document.getElementById('contactActionModal').classList.remove('hidden');
+    }
+
+    function saveEditedContact(e, cardId) {
+      e.preventDefault();
+      const idx = appState.contacts.findIndex(item => item.id === cardId);
+      if (idx === -1) return;
+      appState.contacts[idx] = {
+        ...appState.contacts[idx],
+        name: document.getElementById('editCName').value.trim(),
+        title: document.getElementById('editCTitle').value.trim(),
+        company: document.getElementById('editCCompany').value.trim(),
+        phone: document.getElementById('editCPhone').value.trim(),
+        email: document.getElementById('editCEmail').value.trim(),
+        notes: document.getElementById('editCNotes').value.trim()
+      };
+      saveState();
+      closeContactActionModal();
+      syncAllUI();
+      showToast('名片資訊已更新', 'success');
+    }
+
+    function closeContactActionModal() {
+      document.getElementById('contactActionModal').classList.add('hidden');
+    }
+
+    // 匯出 CSV (含 UTF-8 BOM 確保 Excel 開啟繁體中文不亂碼)
+    function exportCurrentTabCSV() {
+      const list = getFilteredContacts();
+      if (list.length === 0) {
+        showToast('目前頁籤沒有可匯出的名片資料', 'warning');
+        return;
+      }
+      const tabTitle = appState.viewingTabId === 'ALL'
+        ? '全部活動名片總表'
+        : (appState.events.find(e => e.id === appState.viewingTabId)?.name || '活動名片');
+
+      const headers = ['所屬活動頁籤', '建檔時間', '姓名', '公司名稱', '職稱', '電話', 'Email', '接洽重點', '後續跟進', '感謝信狀態'];
+      const rows = list.map(c => {
+        const evName = appState.events.find(e => e.id === c.eventId)?.name || '';
+        return [
+          evName,
+          c.createdAt || '',
+          c.name || '',
+          c.company || '',
+          c.title || '',
+          c.phone || '',
+          c.email || '',
+          c.notes || '',
+          (c.followUpTags || []).join('; '),
+          c.emailSent ? `已寄出 (${c.emailSentAt || ''})` : '待寄出'
+        ].map(val => `"${String(val).replace(/"/g, '""')}"`).join(',');
+      });
+
+      const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
+      triggerDownload(csvContent, `${tabTitle}_名片名單.csv`, 'text/csv;charset=utf-8;');
+      showToast(`已匯出「${tabTitle}」共 ${list.length} 筆 CSV 檔案`, 'success');
+    }
+
+    // 匯出 vCard (.vcf)
+    function exportCurrentTabVCard() {
+      const list = getFilteredContacts();
+      if (list.length === 0) {
+        showToast('目前頁籤沒有可匯出的名片資料', 'warning');
+        return;
+      }
+      const vcfContent = list.map(buildSingleVCardText).join('\r\n');
+      const tabTitle = appState.viewingTabId === 'ALL'
+        ? '全部活動名片'
+        : (appState.events.find(e => e.id === appState.viewingTabId)?.name || '活動名片');
+      triggerDownload(vcfContent, `${tabTitle}.vcf`, 'text/vcard;charset=utf-8;');
+      showToast(`已匯出 ${list.length} 張聯絡人 vCard (.vcf)`, 'success');
+    }
+
+    function exportSingleVCard(cardId) {
+      const c = appState.contacts.find(item => item.id === cardId);
+      if (!c) return;
+      triggerDownload(buildSingleVCardText(c), `${c.name}_${c.company}.vcf`, 'text/vcard;charset=utf-8;');
+      showToast(`已下載 ${c.name} 的 vCard 名片檔`, 'success');
+    }
+
+    function buildSingleVCardText(c) {
+      const evName = appState.events.find(e => e.id === c.eventId)?.name || '';
+      const noteLine = `[${evName}] ${c.notes || ''} ${(c.followUpTags || []).join(',')}`.trim();
+      return [
+        'BEGIN:VCARD',
+        'VERSION:3.0',
+        `FN:${c.name || ''}`,
+        `N:;${c.name || ''};;;`,
+        `ORG:${c.company || ''}`,
+        `TITLE:${c.title || ''}`,
+        c.phone ? `TEL;TYPE=CELL,VOICE:${c.phone}` : '',
+        c.email ? `EMAIL;TYPE=PREF,INTERNET:${c.email}` : '',
+        noteLine ? `NOTE:${noteLine.replace(/\n/g, ' ')}` : '',
+        'END:VCARD'
+      ].filter(Boolean).join('\r\n');
+    }
+
+    function triggerDownload(content, filename, mimeType) {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // =========================================================================
+    // 9. 串接設定 Modal 與導覽切換 (Settings & Navigation)
+    // =========================================================================
+    function switchMainTab(tabName) {
+      ['capture', 'directory', 'template'].forEach(name => {
+        document.getElementById(`view-${name}`).classList.toggle('hidden', name !== tabName);
+        const btn = document.getElementById(`navTab-${name}`);
+        if (name === tabName) {
+          btn.classList.add('bg-brand-600', 'text-white', 'shadow-xs', 'font-bold');
+          btn.classList.remove('text-slate-600', 'hover:bg-slate-100', 'font-semibold');
+        } else {
+          btn.classList.remove('bg-brand-600', 'text-white', 'shadow-xs', 'font-bold');
+          btn.classList.add('text-slate-600', 'hover:bg-slate-100', 'font-semibold');
+        }
+      });
+
+      if (tabName === 'directory') renderDirectory();
+      if (tabName === 'template') updateTemplatePreview();
+    }
+
+    function openSettingsModal() {
+      document.getElementById('setSenderName').value = appState.settings.senderName || '';
+      document.getElementById('setSenderCompany').value = appState.settings.senderCompany || '';
+      document.getElementById('setSenderGmail').value = appState.settings.senderGmail || '';
+      document.getElementById('setGasUrl').value = appState.settings.gasUrl || '';
+      document.getElementById('setCustomGeminiKey').value = appState.settings.customGeminiKey || '';
+      const resultBox = document.getElementById('gasTestResultBox');
+      if (resultBox) resultBox.classList.add('hidden');
+      switchSettingsSubTab('general');
+      document.getElementById('settingsModal').classList.remove('hidden');
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('settingsModal').classList.add('hidden');
+    }
+
+    function switchSettingsSubTab(subTab) {
+      const isGeneral = subTab === 'general';
+      document.getElementById('settingsForm').classList.toggle('hidden', !isGeneral);
+      document.getElementById('settingsGasPanel').classList.toggle('hidden', isGeneral);
+
+      const genBtn = document.getElementById('setTab-general');
+      const gasBtn = document.getElementById('setTab-gas');
+      if (isGeneral) {
+        genBtn.className = 'pb-2.5 text-xs sm:text-sm font-bold border-b-2 border-brand-600 text-brand-700';
+        gasBtn.className = 'pb-2.5 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800';
+      } else {
+        gasBtn.className = 'pb-2.5 text-xs sm:text-sm font-bold border-b-2 border-brand-600 text-brand-700';
+        genBtn.className = 'pb-2.5 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800';
+      }
+    }
+
+    async function handleSaveAndTestSettings(e) {
+      e.preventDefault();
+      appState.settings.senderName = document.getElementById('setSenderName').value.trim();
+      appState.settings.senderCompany = document.getElementById('setSenderCompany').value.trim();
+      appState.settings.senderGmail = document.getElementById('setSenderGmail').value.trim();
+      appState.settings.gasUrl = document.getElementById('setGasUrl').value.trim();
+      appState.settings.customGeminiKey = document.getElementById('setCustomGeminiKey').value.trim();
+
+      saveState();
+      updateSettingsIndicators();
+      updateTemplatePreview();
+
+      const resultBox = document.getElementById('gasTestResultBox');
+      if (!appState.settings.gasUrl) {
+        resultBox.className = 'p-3 rounded-xl border text-xs leading-relaxed bg-amber-50 border-amber-200 text-amber-800';
+        resultBox.innerHTML = '⚠️ 已儲存基本資料。尚未填入 Apps Script 網址，目前名片僅存本機（可點上方「2. 專屬 Code.gs 程式碼」完成部署）。';
+        resultBox.classList.remove('hidden');
+        showToast('設定已儲存（尚未填入 GAS 網址）', 'info');
+        return;
+      }
+
+      const btn = document.getElementById('saveAndTestBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳ 正在測試試算表連線...</span>';
+      resultBox.className = 'p-3 rounded-xl border text-xs leading-relaxed bg-blue-50 border-blue-200 text-blue-800';
+      resultBox.textContent = '正在連線至 Google Sheet「展會與論壇名片幫手」驗證權限...';
+      resultBox.classList.remove('hidden');
+
+      const res = await postToGas({ action: 'ping' });
+      btn.disabled = false;
+      btn.innerHTML = '<span>💾 儲存並測試連線</span>';
+
+      if (res && res.ok) {
+        if (res.email && !appState.settings.senderGmail) {
+          appState.settings.senderGmail = res.email;
+          document.getElementById('setSenderGmail').value = res.email;
+          saveState();
+          updateSettingsIndicators();
+          updateTemplatePreview();
+        }
+
+        const sheetLabel = res.sheetName || SPREADSHEET_TITLE;
+        const tabList = Array.isArray(res.tabs) && res.tabs.length > 0 ? res.tabs.join('、') : '已就緒';
+        resultBox.className = 'p-3 rounded-xl border text-xs leading-relaxed bg-emerald-50 border-emerald-200 text-emerald-900';
+        resultBox.innerHTML = `
+          <div class="font-bold">✅ 連線成功！已成功串接試算表「${escapeHtml(sheetLabel)}」</div>
+          <div class="mt-1">・授權寄信帳號：<b>${escapeHtml(res.email || appState.settings.senderGmail || '已授權 Google 帳號')}</b></div>
+          <div>・現有工作表頁籤：${escapeHtml(tabList)}</div>
+        `;
+        showToast(`✅ 成功連線至「${sheetLabel}」！`, 'success');
+      } else {
+        resultBox.className = 'p-3 rounded-xl border text-xs leading-relaxed bg-rose-50 border-rose-200 text-rose-800';
+        resultBox.innerHTML = '❌ 無法取得試算表回應。請確認：(1) 網址為 <code>/exec</code> 結尾 (2) 部署時「誰可以存取」已設為 <b>所有人</b>。';
+        showToast('連線測試未通過，請檢查部署權限設定', 'warning');
+      }
+    }
+
+    function updateSettingsIndicators() {
+      const hasGmail = Boolean(appState.settings.senderGmail);
+      const hasGas = Boolean(appState.settings.gasUrl);
+
+      const dot = document.getElementById('settingsDot');
+      dot.className = `w-2 h-2 rounded-full ${hasGas ? 'bg-emerald-500' : 'bg-amber-500'}`;
+
+      const headerDot = document.getElementById('headerSyncDot');
+      const headerStatusText = document.getElementById('headerSyncStatusText');
+      if (headerDot && headerStatusText) {
+        headerDot.className = `w-2 h-2 rounded-full ${hasGas ? 'bg-emerald-500' : 'bg-amber-500'}`;
+        headerStatusText.textContent = hasGas ? '即時同步中' : '待貼 GAS 網址';
+      }
+
+      const badge = document.getElementById('gmailBindBadge');
+      const desc = document.getElementById('gmailBindDesc');
+      if (hasGmail || hasGas) {
+        badge.textContent = hasGmail ? `已綁定：${appState.settings.senderGmail}` : '已連線 GAS 授權帳號';
+        badge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800';
+        desc.textContent = hasGas
+          ? `已連線 Google Sheet「${SPREADSHEET_TITLE}」，按「儲存並寄出感謝信」將全自動背景發信並寫入該活動獨立頁籤。`
+          : '已設定寄件信箱（貼上 GAS 網址後即可背景自動發信；目前發信將開啟 Gmail 預填視窗）。';
+      } else {
+        badge.textContent = '尚未綁定 Gmail';
+        badge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800';
+        desc.textContent = '請先在「串接設定」貼上 Apps Script 網址並測試連線，即可由您的 Gmail 自動發出感謝函。';
+      }
+    }
+
+    function copyGasCode() {
+      const textarea = document.getElementById('gasCodeTextarea');
+      textarea.select();
+      textarea.setSelectionRange(0, 99999);
+      try {
+        document.execCommand('copy');
+        showToast('📋 已複製 Google Apps Script 程式碼！', 'success');
+      } catch (err) {
+        showToast('複製失敗，請手動全選複製程式碼', 'warning');
+      }
+    }
+
+    // =========================================================================
+    // 10. 工具函式 (Toast & HTML Escaping)
+    // =========================================================================
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      const colors = {
+        success: 'bg-slate-900 text-white border-emerald-500',
+        warning: 'bg-amber-900 text-white border-amber-400',
+        error: 'bg-rose-900 text-white border-rose-400',
+        info: 'bg-slate-800 text-white border-brand-400'
+      };
+      toast.className = `pointer-events-auto px-4 py-3 rounded-xl shadow-lg border-l-4 text-xs sm:text-sm font-medium flex items-center justify-between gap-2 animate-slide-up ${colors[type] || colors.info}`;
+      toast.innerHTML = `<span>${escapeHtml(message)}</span>`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.25s ease';
+        setTimeout(() => toast.remove(), 260);
+      }, 3400);
+    }
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function escapeXml(str) {
+      return escapeHtml(str);
+    }
+
+    // 啟動應用程式
+    window.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>
